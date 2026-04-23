@@ -1,0 +1,31 @@
+<div class="min-h-screen bg-gray-100">
+
+  <!-- Navbar Topo -->
+  <nav class="bg-blue-600 p-4 text-white flex justify-between items-center shadow-md">
+    <div class="flex items-center space-x-4">
+      <div class="h-8 w-8 bg-white text-blue-600 rounded flex items-center justify-center font-bold">R</div>
+      <h1 class="text-xl font-bold tracking-wide">RoomRes Dashboard</h1>
+    </div>
+
+    <div class="flex items-center space-x-4">
+      <span class="text-sm font-medium opacity-90">Olá, {{ authService.currentUserValue?.name || 'Administrador' }}</span>
+      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold transition-colors shadow">
+        Sair
+      </button>
+    </div>
+  </nav>
+
+  <!-- Conteúdo Central -->
+  <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl font-bold text-gray-800">Catálogo de Salas</h2>
+    <p class="text-gray-500 mt-2">Você está na área protegida pelo AuthGuard.</p>
+
+    <!-- Grid Temporário -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center h-48 border-dashed">
+        <span class="text-gray-400">Em breve: Cards das Salas</span>
+      </div>
+    </div>
+  </div>
+
+</div>
