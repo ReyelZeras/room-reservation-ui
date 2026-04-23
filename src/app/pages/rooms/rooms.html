@@ -1,31 +1,91 @@
-<div class="min-h-screen bg-gray-100">
+<div class="min-h-screen bg-gray-50">
 
   <!-- Navbar Topo -->
-  <nav class="bg-blue-600 p-4 text-white flex justify-between items-center shadow-md">
-    <div class="flex items-center space-x-4">
-      <div class="h-8 w-8 bg-white text-blue-600 rounded flex items-center justify-center font-bold">R</div>
-      <h1 class="text-xl font-bold tracking-wide">RoomRes Dashboard</h1>
+  <nav class="bg-blue-700 p-4 text-white flex justify-between items-center shadow-lg">
+    <div class="flex items-center space-x-3">
+      <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner">R</div>
+      <h1 class="text-xl font-bold tracking-wide">RoomRes</h1>
     </div>
 
-    <div class="flex items-center space-x-4">
-      <span class="text-sm font-medium opacity-90">Olá, {{ authService.currentUserValue?.name || 'Administrador' }}</span>
-      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold transition-colors shadow">
-        Sair
+    <div class="flex items-center space-x-6">
+      <div class="flex items-center space-x-2">
+        <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center border-2 border-blue-400">
+          <span class="text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A') | uppercase }}</span>
+        </div>
+        <span class="text-sm font-medium">{{ authService.currentUserValue?.name || 'Administrador' }}</span>
+      </div>
+      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm font-semibold transition-all shadow hover:shadow-md flex items-center space-x-1">
+        <span>Sair</span>
       </button>
     </div>
   </nav>
 
   <!-- Conteúdo Central -->
   <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-    <h2 class="text-3xl font-bold text-gray-800">Catálogo de Salas</h2>
-    <p class="text-gray-500 mt-2">Você está na área protegida pelo AuthGuard.</p>
 
-    <!-- Grid Temporário -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center justify-center h-48 border-dashed">
-        <span class="text-gray-400">Em breve: Cards das Salas</span>
+    <div class="flex justify-between items-end mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Catálogo de Salas</h2>
+        <p class="text-gray-500 mt-1">Explore e reserve os espaços corporativos disponíveis.</p>
       </div>
     </div>
-  </div>
 
+    <!-- Estado de Carregamento -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+    </div>
+
+    <!-- Estado de Erro -->
+    <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm mb-6">
+      <p class="text-sm text-red-700 font-medium">{{ error }}</p>
+    </div>
+
+    <!-- Grid de Salas -->
+    <div *ngIf="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Se não houver salas -->
+      <div *ngIf="rooms.length === 0" class="col-span-full bg-white p-10 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center text-center border-dashed">
+        <h3 class="text-lg font-medium text-gray-900">Nenhuma sala encontrada</h3>
+        <p class="text-gray-500 mt-1">O sistema ainda não possui salas cadastradas.</p>
+      </div>
+
+      <!-- Card da Sala (Loop do Angular) -->
+      <div *ngFor="let room of rooms" class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden flex flex-col">
+
+        <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-700 relative p-4 flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': room.status === 'AVAILABLE',
+                    'bg-red-100 text-red-800': room.status === 'OCCUPIED',
+                    'bg-yellow-100 text-yellow-800': room.status === 'MAINTENANCE'
+                  }">
+              {{ formatStatus(room.status) }}
+            </span>
+            <span class="bg-black bg-opacity-30 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+              Capacidade: {{ room.capacity }}
+            </span>
+          </div>
+        </div>
+
+        <div class="p-5 flex-grow flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 truncate" [title]="room.name">{{ room.name }}</h3>
+            <div class="mt-2 flex items-center text-sm text-gray-500">
+              <span class="truncate">{{ room.location }}</span>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <button [disabled]="room.status !== 'AVAILABLE'"
+                    class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors">
+              {{ room.status === 'AVAILABLE' ? 'Reservar Sala' : 'Indisponível' }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 </div>

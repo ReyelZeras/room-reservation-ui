@@ -10,7 +10,8 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  private readonly API_URL = 'http://localhost:8080/api/v1/auth';
+  // Mantemos o /api por causa do nosso Proxy
+  private readonly API_URL = '/api/v1/auth';
 
   constructor(private http: HttpClient) {
     const storedUser = localStorage.getItem('currentUser');
@@ -19,12 +20,25 @@ export class AuthService {
     }
   }
 
-  login(email: string, password?: string): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>(`${this.API_URL}/dev/token?email=${email}`).pipe(
-      tap(response => {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('currentUser', JSON.stringify(response.user));
-        this.currentUserSubject.next(response.user);
+  // ATENÇÃO: Mudamos de Observable<AuthResponse> para Observable<any>
+  login(email: string, password?: string): Observable<any> {
+
+    // O SEGREDO ESTÁ AQUI: { responseType: 'text' }
+    return this.http.get(`${this.API_URL}/dev/token?email=${email}`, { responseType: 'text' }).pipe(
+      tap((token: string) => {
+        // Guarda o token real do Java no navegador
+        localStorage.setItem('token', token);
+
+        // Como o /dev/token só nos devolve a string, vamos simular o objeto do usuário na tela
+        const user: User = {
+          id: '1',
+          name: email.split('@')[0], // Pega a primeira parte do email para ser o nome
+          email: email,
+          role: 'ADMIN'
+        };
+
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
       })
     );
   }

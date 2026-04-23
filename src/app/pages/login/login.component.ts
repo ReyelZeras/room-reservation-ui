@@ -36,8 +36,9 @@ export class LoginComponent {
 
     this.authService.login(email, password).subscribe({
       next: () => {
-        alert('Login com sucesso!');
+        // CORREÇÃO: Retiramos o alert e agora redirecionamos o utilizador diretamente!
         this.isLoading = false;
+        this.router.navigate(['/rooms']);
       },
       error: (err: any) => {
         this.isLoading = false;

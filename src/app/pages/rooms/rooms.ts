@@ -70,7 +70,7 @@ import { Router } from '@angular/router';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <h3 class="text-lg font-medium text-gray-900">Nenhuma sala encontrada</h3>
-            <p class="text-gray-500 mt-1">O sistema ainda não possui salas cadastradas.</p>
+            <p class="text-gray-500 mt-1">O sistema ainda não possui salas cadastradas ou o serviço está indisponível.</p>
           </div>
 
           <!-- Card da Sala -->
@@ -138,14 +138,18 @@ export class RoomsComponent implements OnInit {
 
   fetchRooms(): void {
     this.isLoading = true;
+    this.error = '';
+
     this.roomService.getAllRooms().subscribe({
       next: (data) => {
-        this.rooms = data;
+        // CORREÇÃO: Garante que "data" é sempre um Array para não explodir o "rooms.length" no HTML
+        this.rooms = Array.isArray(data) ? data : [];
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Erro ao buscar salas', err);
-        this.error = 'Falha ao carregar o catálogo de salas. Verifique se os microsserviços estão online.';
+        // Agora o Loading pára, e a mensagem de erro aparece!
+        this.error = 'Falha ao carregar o catálogo de salas. Verifique a conexão com o Gateway (Porta 8080).';
         this.isLoading = false;
       }
     });
