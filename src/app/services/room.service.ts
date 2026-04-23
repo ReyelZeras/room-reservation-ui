@@ -7,7 +7,8 @@ import { Room } from '../models/room';
   providedIn: 'root'
 })
 export class RoomService {
-  private readonly API_URL = 'http://localhost:8080/api/v1/rooms';
+  // REMOVIDO o localhost:8080. O Proxy assume o comando!
+  private readonly API_URL = '/api/v1/rooms';
 
   constructor(private http: HttpClient) { }
 
