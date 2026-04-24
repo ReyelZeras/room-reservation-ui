@@ -10,7 +10,6 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  // Mantemos o /api por causa do nosso Proxy
   private readonly API_URL = '/api/v1/auth';
 
   constructor(private http: HttpClient) {
@@ -20,19 +19,16 @@ export class AuthService {
     }
   }
 
-  // ATENÇÃO: Mudamos de Observable<AuthResponse> para Observable<any>
   login(email: string, password?: string): Observable<any> {
-
-    // O SEGREDO ESTÁ AQUI: { responseType: 'text' }
     return this.http.get(`${this.API_URL}/dev/token?email=${email}`, { responseType: 'text' }).pipe(
       tap((token: string) => {
-        // Guarda o token real do Java no navegador
         localStorage.setItem('token', token);
 
-        // Como o /dev/token só nos devolve a string, vamos simular o objeto do usuário na tela
+        // CORREÇÃO AQUI: Usando um UUID real do seu banco para o mock não explodir o Booking Service
+        // Usei o ID do "admin@atualizado.com" que você me enviou no chat anterior.
         const user: User = {
-          id: '1',
-          name: email.split('@')[0], // Pega a primeira parte do email para ser o nome
+          id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+          name: email.split('@')[0],
           email: email,
           role: 'ADMIN'
         };
