@@ -10,6 +10,9 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { RoomsComponent } from './pages/rooms/rooms';
 
+import { NavbarComponent } from './components/navbar/navbar.component'; // Ajuste este caminho para onde o ficheiro estiver!
+
+
 import { ProfileComponent } from './pages/profile/profile';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings';
 
@@ -25,7 +28,8 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
     RoomsComponent,
     RegisterComponent,
     ProfileComponent,   // ADICIONADO
-    MyBookingsComponent // ADICIONADO // CORREÇÃO: Declarado corretamente
+    MyBookingsComponent, // ADICIONADO // CORREÇÃO: Declarado corretamente
+    NavbarComponent
 
   ],
   imports: [
