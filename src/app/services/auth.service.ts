@@ -24,6 +24,7 @@ export class AuthService {
     return this.http.post('/api/v1/users', payload);
   }
 
+  // MÉTODO RESTAURADO COM O CÓDIGO REAL
   login(email: string, password?: string): Observable<any> {
     return this.http.get(`${this.API_URL}/dev/token?email=${email}`, { responseType: 'text' }).pipe(
       switchMap(token => {
@@ -38,6 +39,27 @@ export class AuthService {
         );
       }),
       catchError((err: any) => throwError(() => err))
+    );
+  }
+
+  // NOVO MÉTODO PARA PROCESSAR O LOGIN SOCIAL
+  processSocialLogin(token: string): Observable<any> {
+    // 1. Salva o token que veio da URL
+    localStorage.setItem('token', token);
+
+    const cacheBuster = new Date().getTime();
+
+    // 2. Com o token em mãos, bate na rota /me para descobrir quem é o usuário
+    return this.http.get<User>(`${this.API_URL}/me?cb=${cacheBuster}`).pipe(
+      tap(user => {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+      }),
+      catchError((err: any) => {
+        // Se falhar o /me, destroi o token falso/vencido da URL
+        localStorage.removeItem('token');
+        return throwError(() => err);
+      })
     );
   }
 
