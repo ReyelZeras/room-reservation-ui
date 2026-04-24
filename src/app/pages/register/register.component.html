@@ -1,45 +1,67 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md relative">
+    
+    <button routerLink="/" class="absolute -top-12 left-0 text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium transition-colors">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Voltar
+    </button>
+
     <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Criar nova conta
-      </h2>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Criar nova conta</h2>
       <p class="mt-2 text-center text-sm text-gray-600">
-        Ou
-        <a routerLink="/login" class="font-medium text-blue-600 hover:text-blue-500">
-          entre na sua conta existente
-        </a>
+        Ou <a routerLink="/login" class="font-medium text-blue-600 hover:text-blue-500">entre na sua conta existente</a>
       </p>
     </div>
-
+    
     <form class="mt-8 space-y-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <div class="rounded-md shadow-sm space-y-4">
+      <div class="space-y-4">
         <div>
-          <label for="name" class="sr-only">Nome Completo</label>
-          <input id="name" type="text" formControlName="name" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Nome Completo">
+          <input formControlName="name" type="text" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Nome Completo">
         </div>
         <div>
-          <label for="email" class="sr-only">Email</label>
-          <input id="email" type="email" formControlName="email" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Endereço de Email">
+          <input formControlName="email" type="email" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="E-mail corporativo">
         </div>
         <div>
-          <label for="password" class="sr-only">Senha</label>
-          <input id="password" type="password" formControlName="password" class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Senha (mínimo 6 caracteres)">
+          <input formControlName="password" type="password" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Senha segura">
         </div>
       </div>
 
-      <div *ngIf="errorMessage" class="text-red-500 text-sm text-center font-medium">
-        {{ errorMessage }}
-      </div>
+      <div *ngIf="errorMessage" class="text-red-500 text-sm text-center font-medium">{{ errorMessage }}</div>
 
       <div>
-        <button type="submit" [disabled]="registerForm.invalid || isLoading" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors">
-          <span *ngIf="isLoading" class="absolute left-0 inset-y-0 flex items-center pl-3">
-            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <button type="submit" [disabled]="registerForm.invalid || isLoading" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:bg-gray-400">
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <svg *ngIf="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
           </span>
-          Registrar
+          {{ isLoading ? 'A processar...' : 'Registrar Conta' }}
         </button>
       </div>
     </form>
+  </div>
+
+  <!-- NOSSO MODAL NATIVO DE SUCESSO (Visual idêntico ao SweetAlert, mas sem bugs) -->
+  <div *ngIf="showSuccessModal" class="fixed z-10 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full sm:p-6">
+        <div>
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-5">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Sucesso!</h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500">Cadastro realizado com sucesso! Faça login para continuar.</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-6">
+          <button type="button" (click)="goToLogin()" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:text-sm">Ir para Login</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

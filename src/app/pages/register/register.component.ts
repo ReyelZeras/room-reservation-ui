@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -12,11 +12,13 @@ export class RegisterComponent {
   registerForm: FormGroup;
   isLoading = false;
   errorMessage = '';
+  showSuccessModal = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef // Adicionado para forçar a atualização da tela
   ) {
     this.registerForm = this.fb.group({
       name: ['', Validators.required],
@@ -26,39 +28,41 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
-      return;
-    }
+    if (this.registerForm.invalid) return;
 
     this.isLoading = true;
     this.errorMessage = '';
-
-    const formValue = this.registerForm.value;
-
-    // Geração do username a partir do email para não quebrar a not-null constraint do banco
-    const generatedUsername = formValue.email.split('@')[0] + Math.floor(Math.random() * 1000);
+    this.cdr.detectChanges();
 
     const payload = {
-      name: formValue.name,
-      email: formValue.email,
-      password: formValue.password,
-      username: generatedUsername,
-      provider: 'local'
+      name: this.registerForm.value.name,
+      email: this.registerForm.value.email,
+      password: this.registerForm.value.password,
+      username: this.registerForm.value.email // Previne o erro NOT NULL do Postgres
     };
 
     this.authService.register(payload).subscribe({
       next: () => {
         this.isLoading = false;
-        alert('Cadastro realizado com sucesso! Faça login para continuar.');
-        this.router.navigate(['/login']);
+        this.showSuccessModal = true;
+        this.cdr.detectChanges();
       },
-      // CORREÇÃO: Adicionada tipagem ": any" exigida pelo modo Strict do TypeScript
       error: (err: any) => {
         this.isLoading = false;
-        this.errorMessage = 'Erro ao realizar cadastro. Verifique se o e-mail já existe.';
-        console.error(err);
+        
+        // Se o backend retornou 201, mas o Angular achou que era erro de JSON:
+        if (err.status === 201 || err.status === 200) {
+          this.showSuccessModal = true;
+        } else {
+          this.errorMessage = err.error?.message || err.error?.erro || 'Erro ao realizar o registo. Verifique os dados.';
+        }
+        
+        this.cdr.detectChanges(); // Força a tela a parar de carregar
       }
     });
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

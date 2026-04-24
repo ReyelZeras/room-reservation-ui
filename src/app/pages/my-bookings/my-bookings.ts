@@ -1,8 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
-import { BookingResponse } from '../../models/booking';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-my-bookings',
@@ -10,72 +8,93 @@ import { BookingResponse } from '../../models/booking';
   standalone: false
 })
 export class MyBookingsComponent implements OnInit {
-  bookings: BookingResponse[] = [];
+  bookings: any[] = [];
   isLoading = true;
-
-  // CORREÇÃO: A variável agora se chama 'errorMessage' exatamente como está no seu HTML!
   errorMessage = '';
+  
+  showConfirmModal = false;
+  bookingToCancel: string | null = null;
+  isCancelling = false;
 
   constructor(
-    public authService: AuthService,
     private bookingService: BookingService,
-    private router: Router,
+    public authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.fetchMyBookings();
+    this.loadBookings();
   }
 
-  fetchMyBookings(): void {
+  loadBookings(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+    
     const userId = this.authService.currentUserValue?.id;
-
     if (!userId) {
-      this.errorMessage = 'Usuário não identificado. Faça login novamente.';
+      this.errorMessage = 'Utilizador não autenticado.';
       this.isLoading = false;
+      this.cdr.detectChanges();
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = ''; // Limpa a mensagem de erro ao carregar
-
-    this.bookingService.getUserBookings(userId).subscribe({
-      next: (data: any) => {
-        if (data && data.content && Array.isArray(data.content)) {
-          this.bookings = data.content;
-        } else if (Array.isArray(data)) {
-          this.bookings = data;
-        } else {
-          this.bookings = [];
-        }
+    this.bookingService.getBookingsByUser(userId).subscribe({
+      next: (data: any) => { 
+        this.bookings = data || [];
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Erro ao buscar reservas:', err);
-        this.errorMessage = 'Falha ao carregar suas reservas.'; // Atualiza a variável correta
+      error: (err: any) => { 
         this.isLoading = false;
+        
+        // Se a API retornou Status 200/204 mas sem dados (Empty Body), não é erro real
+        if (err.status === 200 || err.status === 204) {
+           this.bookings = [];
+        } else {
+           console.error('Erro ao carregar histórico', err);
+           this.errorMessage = 'Não foi possível carregar o seu histórico de reservas.';
+        }
+        
         this.cdr.detectChanges();
       }
     });
   }
 
-  cancelBooking(bookingId: string): void {
-    if (confirm('Tem certeza que deseja cancelar esta reserva?')) {
-      this.bookingService.cancelBooking(bookingId).subscribe({
-        next: () => {
-          this.fetchMyBookings();
-        },
-        error: (err: any) => {
-          console.error('Erro ao cancelar:', err);
-          alert('Não foi possível cancelar a reserva.');
-        }
-      });
-    }
+  openCancelModal(id: string): void {
+    this.bookingToCancel = id;
+    this.showConfirmModal = true;
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/']);
+  closeCancelModal(): void {
+    this.showConfirmModal = false;
+    this.bookingToCancel = null;
+    this.isCancelling = false;
+  }
+
+  confirmCancel(): void {
+    if (!this.bookingToCancel) return;
+    
+    this.isCancelling = true;
+    this.cdr.detectChanges();
+    
+    this.bookingService.cancelBooking(this.bookingToCancel).subscribe({
+      next: () => {
+        this.closeCancelModal();
+        this.loadBookings();
+      },
+      error: (err: any) => { 
+        console.error(err);
+        
+        if (err.status === 200 || err.status === 204) {
+            this.closeCancelModal();
+            this.loadBookings();
+            return;
+        }
+        
+        alert('Não foi possível cancelar a reserva.');
+        this.closeCancelModal();
+      }
+    });
   }
 }

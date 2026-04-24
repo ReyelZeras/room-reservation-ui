@@ -1,10 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { RoomService } from '../../services/room.service';
 import { BookingService } from '../../services/booking.service';
-import { Room } from '../../models/room';
+import { AuthService } from '../../services/auth.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-rooms',
@@ -12,23 +10,23 @@ import { Room } from '../../models/room';
   standalone: false
 })
 export class RoomsComponent implements OnInit {
-
-  rooms: Room[] = [];
+  rooms: any[] = [];
   isLoading = true;
-  error = '';
-
-  selectedRoom: Room | null = null;
+  
+  selectedRoom: any = null;
+  isModalOpen = false;
   bookingForm: FormGroup;
   isSubmittingBooking = false;
-
-  bookingSuccessMessage = '';
-  bookingErrorMessage = ''; // NOVA VARIÁVEL DE ERRO
+  
+  bookingErrorMessage = '';
+  bookingSuccessMessage = ''; // Esta mensagem agora vai aparecer na tela principal
+  
+  minDate: string = '';
 
   constructor(
-    public authService: AuthService,
     private roomService: RoomService,
     private bookingService: BookingService,
-    private router: Router,
+    private authService: AuthService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
@@ -39,106 +37,107 @@ export class RoomsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fetchRooms();
+    this.loadRooms();
+    
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    this.minDate = now.toISOString().slice(0, 16);
   }
 
-  fetchRooms(): void {
+  loadRooms(): void {
     this.isLoading = true;
-    this.error = '';
-
-    this.roomService.getAllRooms().subscribe({
-      next: (data: any) => {
-        if (data && data.content && Array.isArray(data.content)) {
-          this.rooms = data.content;
-        } else if (Array.isArray(data)) {
-           this.rooms = data;
-        } else {
-           this.rooms = [];
-        }
+    this.roomService.getRooms().subscribe({
+      next: (data: any) => { 
+        this.rooms = data;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Erro ao buscar salas:', err);
-        this.error = 'Falha ao carregar o catálogo de salas.';
+      error: (err: any) => { 
+        console.error('Erro ao carregar salas', err);
         this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  logout(): void {
-    this.authService.logout();
-  }
-
-  formatStatus(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'AVAILABLE': 'Disponível',
-      'OCCUPIED': 'Ocupada',
-      'MAINTENANCE': 'Manutenção'
-    };
-    return statusMap[status] || status;
-  }
-
-  openBookingModal(room: Room): void {
+  openBookingModal(room: any): void {
     this.selectedRoom = room;
-    this.bookingForm.reset();
+    this.isModalOpen = true;
+    this.bookingErrorMessage = '';
     this.bookingSuccessMessage = '';
-    this.bookingErrorMessage = ''; // Limpa o erro ao abrir modal
+    this.bookingForm.reset();
   }
 
-  closeBookingModal(): void {
+  closeModal(): void {
+    this.isModalOpen = false;
     this.selectedRoom = null;
-    this.isSubmittingBooking = false;
+    this.bookingErrorMessage = '';
   }
 
   submitBooking(): void {
     if (this.bookingForm.invalid || !this.selectedRoom) return;
 
     this.isSubmittingBooking = true;
-    this.bookingErrorMessage = ''; // Zera o erro antes de enviar
-
+    this.bookingErrorMessage = '';
+    this.cdr.detectChanges();
+    
     let start = this.bookingForm.value.startTime;
     let end = this.bookingForm.value.endTime;
+    
     if (start && start.length === 16) start += ':00';
     if (end && end.length === 16) end += ':00';
 
-    // CORREÇÃO: Capturamos o ID e validamos para satisfazer o "Strict Mode" do TypeScript
     const userId = this.authService.currentUserValue?.id;
-
+    
     if (!userId) {
-      this.bookingErrorMessage = 'Usuário não identificado. Por favor, faça login novamente.';
+      this.bookingErrorMessage = 'Sessão expirada. Por favor, faça login novamente.';
       this.isSubmittingBooking = false;
       this.cdr.detectChanges();
       return;
     }
 
     const payload = {
-      userId: userId, // Agora o compilador tem a certeza de que isto é uma string
+      userId: userId,
       roomId: this.selectedRoom.id,
       startTime: start,
       endTime: end
     };
 
     this.bookingService.createBooking(payload).subscribe({
-      next: (res) => {
-        this.isSubmittingBooking = false;
-        this.bookingSuccessMessage = 'Sala reservada com sucesso! 🎉';
-        this.cdr.detectChanges();
-
-        setTimeout(() => {
-          this.closeBookingModal();
-          this.fetchRooms();
-        }, 2000);
+      next: () => { 
+        this.processBookingSuccess();
       },
-      error: (err) => {
-        console.error('Erro ao reservar sala:', err);
-        // REMOVIDO: alert()
-        // INSERIDO: Feedback visual integrado
-        this.bookingErrorMessage = 'O horário selecionado está indisponível ou a sala já foi reservada.';
+      error: (err: any) => { 
         this.isSubmittingBooking = false;
+        
+        // Falso erro do Angular (Problema de Parse do JSON em Status 201)
+        if (err.status === 201 || err.status === 200) {
+            this.processBookingSuccess();
+            return;
+        }
+
+        // Erro 422 Genuíno (Sala ocupada)
+        if (err.status === 422) {
+           this.bookingErrorMessage = err.error?.erro || 'A sala já está reservada para o período selecionado.';
+        } else {
+           this.bookingErrorMessage = err.error?.message || 'Ocorreu um erro ao processar a sua reserva.';
+        }
+        
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private processBookingSuccess(): void {
+    this.isSubmittingBooking = false;
+    this.closeModal(); // Fecha o modal imediatamente
+    this.bookingSuccessMessage = 'Reserva concluída com sucesso!';
+    this.cdr.detectChanges();
+    
+    // Apaga a mensagem verde após 5 segundos
+    setTimeout(() => {
+      this.bookingSuccessMessage = '';
+      this.cdr.detectChanges();
+    }, 5000);
   }
 }
