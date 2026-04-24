@@ -7,7 +7,7 @@ import { Room } from '../models/room';
   providedIn: 'root'
 })
 export class RoomService {
-  // REMOVIDO o localhost:8080. O Proxy assume o comando!
+  // A URL que o nosso proxy vai redirecionar para a porta 8080
   private readonly API_URL = '/api/v1/rooms';
 
   constructor(private http: HttpClient) { }
