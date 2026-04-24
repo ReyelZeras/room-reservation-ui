@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-md relative">
 
-    <!-- NOVO: Botão Voltar para a Home -->
+    <!-- Botão Voltar para a Home -->
     <button routerLink="/" class="absolute -top-12 left-0 text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium transition-colors">
       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -22,8 +22,7 @@
           <label for="email" class="block text-sm font-medium text-gray-700">E-mail corporativo</label>
           <div class="mt-1">
             <input id="email" type="email" formControlName="email"
-                   class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                   [ngClass]="{'border-red-300': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}">
+                   class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
           </div>
         </div>
 
@@ -31,8 +30,7 @@
           <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
           <div class="mt-1">
             <input id="password" type="password" formControlName="password"
-                   class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                   [ngClass]="{'border-red-300': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
+                   class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
           </div>
         </div>
 
@@ -47,6 +45,15 @@
           </button>
         </div>
       </form>
+
+      <!-- NOVO: Link para Cadastro -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">
+          Ainda não é funcionário registrado?
+          <a routerLink="/register" class="font-medium text-blue-600 hover:text-blue-500">Crie sua conta aqui</a>
+        </p>
+      </div>
+
     </div>
   </div>
 </div>

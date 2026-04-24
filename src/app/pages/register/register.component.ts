@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -8,8 +8,8 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './register.component.html',
   standalone: false
 })
-export class RegisterComponent implements OnInit {
-  registerForm!: FormGroup;
+export class RegisterComponent {
+  registerForm: FormGroup;
   isLoading = false;
   errorMessage = '';
 
@@ -17,52 +17,47 @@ export class RegisterComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
-
-  ngOnInit(): void {
+  ) {
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
+      name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) return;
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    // CORREÇÃO: Captura os valores do form
-    const formValues = this.registerForm.value;
+    const formValue = this.registerForm.value;
 
-    // CORREÇÃO: Gera o "username" a partir do email para satisfazer o Not-Null constraint do PostgreSQL
-    // Exemplo: teste@teste.com -> username: teste
-    const generatedUsername = formValues.email.split('@')[0];
+    // Geração do username a partir do email para não quebrar a not-null constraint do banco
+    const generatedUsername = formValue.email.split('@')[0] + Math.floor(Math.random() * 1000);
 
-    // Monta o payload final
     const payload = {
-      ...formValues,
-      username: generatedUsername
+      name: formValue.name,
+      email: formValue.email,
+      password: formValue.password,
+      username: generatedUsername,
+      provider: 'local'
     };
 
     this.authService.register(payload).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/login']); // Sucesso, joga pro login
+        alert('Cadastro realizado com sucesso! Faça login para continuar.');
+        this.router.navigate(['/login']);
       },
-      error: (err) => {
+      // CORREÇÃO: Adicionada tipagem ": any" exigida pelo modo Strict do TypeScript
+      error: (err: any) => {
         this.isLoading = false;
-        // Tratamento mais elegante de erros de backend
-        if (err.status === 401 || err.status === 403) {
-           this.errorMessage = 'Acesso negado. O Gateway ainda precisa liberar essa rota.';
-        } else if (err.status === 400 || err.status === 500) {
-           // Em caso de outro erro (como email duplicado), mostra no console
-           console.error('Falha na criação do usuário:', err.error);
-           this.errorMessage = 'Erro no servidor ou dados inválidos. Verifique o console.';
-        } else {
-           this.errorMessage = 'Erro de conexão com o servidor.';
-        }
+        this.errorMessage = 'Erro ao realizar cadastro. Verifique se o e-mail já existe.';
+        console.error(err);
       }
     });
   }
