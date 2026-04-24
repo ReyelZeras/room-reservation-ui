@@ -1,42 +1,55 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { AuthResponse, User } from '../models/user';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private readonly AUTH_URL = '/api/v1/auth';
+  private readonly USERS_URL = '/api/v1/users';
 
-  private readonly API_URL = '/api/v1/auth';
+  private currentUserSubject = new BehaviorSubject<any>(this.getUserFromStorage());
+  public currentUser = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
-    }
+  constructor(private http: HttpClient) { }
+
+  public get currentUserValue(): any {
+    return this.currentUserSubject.value;
   }
 
+  private getUserFromStorage(): any {
+    const user = localStorage.getItem('currentUser');
+    return user ? JSON.parse(user) : null;
+  }
+
+  // Utilizando a rota de dev/token documentada no Swagger do User Service
   login(email: string, password?: string): Observable<any> {
-    return this.http.get(`${this.API_URL}/dev/token?email=${email}`, { responseType: 'text' }).pipe(
-      tap((token: string) => {
-        localStorage.setItem('token', token);
-
-        // CORREÇÃO AQUI: Usando um UUID real do seu banco para o mock não explodir o Booking Service
-        // Usei o ID do "admin@atualizado.com" que você me enviou no chat anterior.
-        const user: User = {
-          id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-          name: email.split('@')[0],
-          email: email,
-          role: 'ADMIN'
-        };
-
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        this.currentUserSubject.next(user);
+    return this.http.get(`${this.AUTH_URL}/dev/token`, {
+      params: { email: email },
+      responseType: 'text'
+    }).pipe(
+      map(tokenString => {
+         return { token: tokenString };
+      }),
+      tap(response => {
+        if (response && response.token) {
+          localStorage.setItem('token', response.token);
+          const userData = { email: email, name: email.split('@')[0], token: response.token };
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          this.currentUserSubject.next(userData);
+        }
       })
     );
+  }
+
+  register(userData: any): Observable<any> {
+    return this.http.post(this.USERS_URL, userData);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
   logout(): void {
@@ -45,7 +58,7 @@ export class AuthService {
     this.currentUserSubject.next(null);
   }
 
-  public get currentUserValue(): User | null {
-    return this.currentUserSubject.value;
+  isAuthenticated(): boolean {
+    return !!this.getToken();
   }
 }
