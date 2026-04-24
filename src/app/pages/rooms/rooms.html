@@ -10,7 +10,8 @@
     <div class="flex items-center space-x-6">
       <div class="flex items-center space-x-2">
         <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center border-2 border-blue-400">
-          <span class="text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A') | uppercase }}</span>
+          <!-- Correção: Usando toUpperCase() nativo em vez de pipe do Angular -->
+          <span class="text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A').toUpperCase() }}</span>
         </div>
         <span class="text-sm font-medium">{{ authService.currentUserValue?.name || 'Administrador' }}</span>
       </div>
@@ -49,7 +50,7 @@
         <p class="text-gray-500 mt-1">O sistema ainda não possui salas cadastradas.</p>
       </div>
 
-      <!-- Card da Sala (Loop do Angular) -->
+      <!-- Card da Sala -->
       <div *ngFor="let room of rooms" class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden flex flex-col">
 
         <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-700 relative p-4 flex flex-col justify-between">

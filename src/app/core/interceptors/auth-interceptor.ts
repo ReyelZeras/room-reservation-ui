@@ -6,9 +6,12 @@ import { Observable } from 'rxjs';
 export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = localStorage.getItem('token');
+    let token = localStorage.getItem('token');
 
     if (token) {
+      // Limpeza de segurança: Se o token veio com aspas do backend, removemos para evitar erro 401
+      token = token.replace(/^"(.*)"$/, '$1');
+
       const clonedRequest = request.clone({
         headers: request.headers.set('Authorization', `Bearer ${token}`)
       });

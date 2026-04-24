@@ -62,8 +62,11 @@
           },
           "defaultConfiguration": "production"
         },
-        "serve": {
+"serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "src/proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "room-reservation-ui:build:production"
