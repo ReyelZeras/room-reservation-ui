@@ -1,26 +1,33 @@
 <div class="min-h-screen bg-gray-50 relative">
 
-  <nav class="bg-blue-700 p-4 text-white flex justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-3">
-      <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner">R</div>
-      <h1 class="text-xl font-bold tracking-wide">RoomRes</h1>
-    </div>
-
-    <div class="flex items-center space-x-6">
-      <div class="flex items-center space-x-2">
-        <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center border-2 border-blue-400">
-          <span class="text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A').toUpperCase() }}</span>
-        </div>
-        <span class="text-sm font-medium">{{ authService.currentUserValue?.name || 'Administrador' }}</span>
+  <nav class="bg-blue-700 p-4 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto flex justify-between items-center w-full">
+      <div class="flex items-center space-x-3">
+        <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner cursor-pointer" routerLink="/">R</div>
+        <h1 class="text-xl font-bold tracking-wide cursor-pointer" routerLink="/">RoomRes</h1>
       </div>
-      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm font-semibold transition-all shadow hover:shadow-md flex items-center space-x-1">
-        <span>Sair</span>
-      </button>
+
+      <div class="hidden md:flex space-x-6 items-center flex-grow justify-center">
+        <a routerLink="/rooms" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-white">Catálogo de Salas</a>
+        <a routerLink="/my-bookings" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Minhas Reservas</a>
+        <a routerLink="/profile" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Meu Perfil</a>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center border-2 border-blue-400">
+            <span class="text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A').toUpperCase() }}</span>
+          </div>
+          <span class="text-sm font-medium hidden sm:block">{{ authService.currentUserValue?.name }}</span>
+        </div>
+        <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-md text-sm font-semibold transition-all shadow">
+          Sair
+        </button>
+      </div>
     </div>
   </nav>
 
   <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-
     <div class="flex justify-between items-end mb-8">
       <div>
         <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Catálogo de Salas</h2>
@@ -37,14 +44,12 @@
     </div>
 
     <div *ngIf="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
       <div *ngIf="rooms.length === 0" class="col-span-full bg-white p-10 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center text-center border-dashed">
         <h3 class="text-lg font-medium text-gray-900">Nenhuma sala encontrada</h3>
         <p class="text-gray-500 mt-1">O sistema ainda não possui salas cadastradas.</p>
       </div>
 
       <div *ngFor="let room of rooms" class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden flex flex-col">
-
         <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-700 relative p-4 flex flex-col justify-between">
           <div class="flex justify-between items-start">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm"
@@ -70,7 +75,6 @@
           </div>
 
           <div class="mt-6">
-            <!-- AÇÃO ADICIONADA AQUI -->
             <button (click)="openBookingModal(room)" [disabled]="room.status !== 'AVAILABLE'"
                     class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors">
               {{ room.status === 'AVAILABLE' ? 'Reservar Sala' : 'Indisponível' }}
@@ -81,72 +85,55 @@
     </div>
   </div>
 
-  <!-- ================= MODAL FLUTUANTE DE RESERVA ================= -->
-  <!-- A diretiva *ngIf faz o modal só existir se selectedRoom não for nulo -->
   <div *ngIf="selectedRoom" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-
-    <!-- Fundo escuro opaco (Clica para fechar) -->
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" (click)="closeBookingModal()"></div>
       <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-      <!-- Caixa Branca do Modal -->
       <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-
-        <!-- Header do Modal -->
         <div class="bg-blue-600 px-4 py-3 sm:px-6 flex justify-between items-center">
           <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">
             Nova Reserva: {{ selectedRoom.name }}
           </h3>
           <button (click)="closeBookingModal()" class="text-white hover:text-gray-200">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        <!-- Corpo com Formulário -->
         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div *ngIf="bookingSuccessMessage" class="mb-4 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
+            <p class="text-sm text-green-700 font-medium">{{ bookingSuccessMessage }}</p>
+          </div>
 
-          <div *ngIf="bookingSuccessMessage" class="mb-4 bg-green-50 border-l-4 border-green-500 p-4">
-            <p class="text-sm text-green-700">{{ bookingSuccessMessage }}</p>
+          <!-- MENSAGEM DE ERRO BONITA AQUI (Adeus Alert) -->
+          <div *ngIf="bookingErrorMessage" class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+            <p class="text-sm text-red-700 font-medium">{{ bookingErrorMessage }}</p>
           </div>
 
           <form [formGroup]="bookingForm" *ngIf="!bookingSuccessMessage">
             <div class="space-y-4">
-
               <div>
                 <label class="block text-sm font-medium text-gray-700">Data e Hora de Entrada</label>
-                <!-- input type="datetime-local" usa o calendário nativo do navegador -->
-                <input type="datetime-local" formControlName="startTime"
-                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="datetime-local" formControlName="startTime" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700">Data e Hora de Saída</label>
-                <input type="datetime-local" formControlName="endTime"
-                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="datetime-local" formControlName="endTime" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
               </div>
-
-              <p class="text-xs text-gray-500 mt-2">Dica: Selecione o dia e o horário exato da sua reunião.</p>
             </div>
           </form>
         </div>
 
-        <!-- Rodapé do Modal (Botões) -->
         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse" *ngIf="!bookingSuccessMessage">
           <button type="button" (click)="submitBooking()" [disabled]="bookingForm.invalid || isSubmittingBooking"
                   class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm disabled:bg-blue-300">
             {{ isSubmittingBooking ? 'Processando...' : 'Confirmar Reserva' }}
           </button>
-          <button type="button" (click)="closeBookingModal()"
-                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+          <button type="button" (click)="closeBookingModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
             Cancelar
           </button>
         </div>
-
       </div>
     </div>
   </div>
-
 </div>

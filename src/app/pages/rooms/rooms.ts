@@ -20,7 +20,9 @@ export class RoomsComponent implements OnInit {
   selectedRoom: Room | null = null;
   bookingForm: FormGroup;
   isSubmittingBooking = false;
+
   bookingSuccessMessage = '';
+  bookingErrorMessage = ''; // NOVA VARIÁVEL DE ERRO
 
   constructor(
     public authService: AuthService,
@@ -65,10 +67,8 @@ export class RoomsComponent implements OnInit {
     });
   }
 
-  // MUDANÇA AQUI: Ao invés de ir para /login, vai para a Home (/)
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/']);
   }
 
   formatStatus(status: string): string {
@@ -84,6 +84,7 @@ export class RoomsComponent implements OnInit {
     this.selectedRoom = room;
     this.bookingForm.reset();
     this.bookingSuccessMessage = '';
+    this.bookingErrorMessage = ''; // Limpa o erro ao abrir modal
   }
 
   closeBookingModal(): void {
@@ -95,14 +96,25 @@ export class RoomsComponent implements OnInit {
     if (this.bookingForm.invalid || !this.selectedRoom) return;
 
     this.isSubmittingBooking = true;
+    this.bookingErrorMessage = ''; // Zera o erro antes de enviar
 
     let start = this.bookingForm.value.startTime;
     let end = this.bookingForm.value.endTime;
     if (start && start.length === 16) start += ':00';
     if (end && end.length === 16) end += ':00';
 
+    // CORREÇÃO: Capturamos o ID e validamos para satisfazer o "Strict Mode" do TypeScript
+    const userId = this.authService.currentUserValue?.id;
+
+    if (!userId) {
+      this.bookingErrorMessage = 'Usuário não identificado. Por favor, faça login novamente.';
+      this.isSubmittingBooking = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     const payload = {
-      userId: this.authService.currentUserValue?.id || 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+      userId: userId, // Agora o compilador tem a certeza de que isto é uma string
       roomId: this.selectedRoom.id,
       startTime: start,
       endTime: end
@@ -121,8 +133,11 @@ export class RoomsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao reservar sala:', err);
-        alert('Erro ao tentar reservar. Verifique o console (F12) para detalhes.');
+        // REMOVIDO: alert()
+        // INSERIDO: Feedback visual integrado
+        this.bookingErrorMessage = 'O horário selecionado está indisponível ou a sala já foi reservada.';
         this.isSubmittingBooking = false;
+        this.cdr.detectChanges();
       }
     });
   }

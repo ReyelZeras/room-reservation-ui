@@ -10,6 +10,10 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { RoomsComponent } from './pages/rooms/rooms';
 
+import { ProfileComponent } from './pages/profile/profile';
+import { MyBookingsComponent } from './pages/my-bookings/my-bookings';
+
+
 // Se o nome do arquivo do interceptor for diferente, ajuste aqui. Assumindo auth-interceptor baseado no PDF.
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -19,7 +23,10 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
     HomeComponent,
     LoginComponent,
     RoomsComponent,
-    RegisterComponent // CORREÇÃO: Declarado corretamente
+    RegisterComponent,
+    ProfileComponent,   // ADICIONADO
+    MyBookingsComponent // ADICIONADO // CORREÇÃO: Declarado corretamente
+
   ],
   imports: [
     BrowserModule,
