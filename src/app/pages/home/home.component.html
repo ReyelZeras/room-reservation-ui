@@ -1,0 +1,61 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+
+  <!-- Navbar Pública -->
+  <nav class="bg-blue-700 p-4 text-white flex justify-between items-center shadow-lg">
+    <div class="flex items-center space-x-3 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner">R</div>
+        <h1 class="text-xl font-bold tracking-wide">RoomRes</h1>
+      </div>
+      <button (click)="goToLogin()" class="bg-white text-blue-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-bold transition-all shadow hover:shadow-md">
+        Entrar no Sistema
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section (Seção Principal) -->
+  <div class="flex-grow flex flex-col items-center justify-center text-center px-4 py-20 bg-gradient-to-b from-blue-700 to-blue-900 text-white">
+    <h1 class="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight">O espaço ideal para a sua próxima grande ideia.</h1>
+    <p class="text-xl md:text-2xl mb-10 max-w-2xl text-blue-100">Reserve salas de reunião corporativas em segundos. Simples, rápido e integrado.</p>
+    <button (click)="goToLogin()" class="bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
+      Fazer uma Reserva
+    </button>
+  </div>
+
+  <!-- Sugestões (Consumindo Quarkus) -->
+  <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 w-full">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-900">Salas em Destaque</h2>
+      <p class="text-gray-500 mt-2">Sugestões ultrarrápidas geradas pela nossa IA em Quarkus.</p>
+    </div>
+
+    <!-- Spinner de Loading -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-10">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+    </div>
+
+    <!-- Grid de Cards de Sugestão -->
+    <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div *ngFor="let sug of suggestions" class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100 flex flex-col">
+        <div class="h-3 bg-gradient-to-r from-green-400 to-blue-500"></div>
+        <div class="p-6 flex-grow flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ sug.roomName }}</h3>
+            <p class="text-gray-600">{{ sug.description }}</p>
+          </div>
+          <div class="mt-4 flex items-center text-sm text-gray-500 font-medium">
+            <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+            </svg>
+            Capacidade: {{ sug.capacity }} pessoas
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-400 text-center py-6 mt-auto">
+    <p>&copy; 2026 RoomRes. Desenvolvido com arquitetura de Microsserviços.</p>
+  </footer>
+</div>

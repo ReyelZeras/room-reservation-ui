@@ -8,12 +8,14 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RoomsComponent } from './pages/rooms/rooms';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
+import { HomeComponent } from './pages/home/home.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    RoomsComponent
+    RoomsComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
