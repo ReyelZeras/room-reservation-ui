@@ -65,9 +65,10 @@ export class RoomsComponent implements OnInit {
     });
   }
 
+  // MUDANÇA AQUI: Ao invés de ir para /login, vai para a Home (/)
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
   formatStatus(status: string): string {
@@ -95,28 +96,23 @@ export class RoomsComponent implements OnInit {
 
     this.isSubmittingBooking = true;
 
-    // CORREÇÃO DO FORMATO DE DATA (Garante que tenha os segundos :00 no final)
     let start = this.bookingForm.value.startTime;
     let end = this.bookingForm.value.endTime;
     if (start && start.length === 16) start += ':00';
     if (end && end.length === 16) end += ':00';
 
     const payload = {
-      // Garantindo um fallback em caso de falha do localStorage
       userId: this.authService.currentUserValue?.id || 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
       roomId: this.selectedRoom.id,
       startTime: start,
       endTime: end
     };
 
-    console.log('Enviando Payload para o Backend:', payload);
-
     this.bookingService.createBooking(payload).subscribe({
       next: (res) => {
         this.isSubmittingBooking = false;
         this.bookingSuccessMessage = 'Sala reservada com sucesso! 🎉';
-
-        this.cdr.detectChanges(); // <--- ADICIONE ESTA LINHA AQUI!
+        this.cdr.detectChanges();
 
         setTimeout(() => {
           this.closeBookingModal();
