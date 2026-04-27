@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router'; // ActivatedRoute adicionado!
 import { AuthService } from '../../services/auth.service';
+import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -12,12 +13,14 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute // <--- NOVO: Precisamos disso para ler a URL
+    private route: ActivatedRoute, // Injetado para ler os parâmetros da URL
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -26,38 +29,30 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // 1. Ao carregar a página de login, verifica se existe um '?token=' na URL
+    // Escuta a URL para ver se o backend nos enviou de volta do GitHub com um token
     this.route.queryParams.subscribe(params => {
       const token = params['token'];
-      const error = params['error'];
-
-      if (error) {
-        this.errorMessage = 'Erro ao autenticar com o GitHub: ' + error;
-      }
-      else if (token) {
-        // 2. Se encontrou o token, mostra carregamento na tela
+      if (token) {
         this.isLoading = true;
+        this.cdr.detectChanges();
 
-        // 3. Usa o AuthService para processar esse token do GitHub e baixar o Perfil
+        // Usa o método que já tínhamos no AuthService para processar logins sociais
         this.authService.processSocialLogin(token).subscribe({
           next: () => {
             this.router.navigate(['/rooms']);
           },
-          error: (err) => {
-            console.error('Erro ao processar login social:', err);
-            this.errorMessage = 'Falha ao recuperar os dados do perfil via GitHub.';
+          error: (err: any) => {
             this.isLoading = false;
+            this.errorMessage = 'Erro ao sincronizar com o GitHub.';
+            this.cdr.detectChanges();
           }
         });
       }
     });
   }
 
-  // MÉTODO DO BOTÃO GITHUB
-  loginWithGitHub(): void {
-    // Redireciona violentamente o usuário para o Spring Cloud Gateway (nosso Backend)
-    // O backend (Java) vai interceptar essa rota e jogá-lo para a tela do GitHub
-    window.location.href = 'http://localhost:8080/oauth2/authorization/github';
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {
@@ -65,18 +60,35 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
-    const { email, password } = this.loginForm.value;
+    const email = this.loginForm.value.email;
+    const password = this.loginForm.value.password;
 
-    this.authService.login(email, password).subscribe({
-      next: () => {
-        this.router.navigate(['/rooms']);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = 'Credenciais inválidas ou erro no servidor.';
-        console.error(err);
-      }
-    });
+    this.authService.login(email, password)
+      .pipe(timeout(5000))
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/rooms']);
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+
+          if (err.name === 'TimeoutError') {
+            this.errorMessage = 'O servidor demorou muito para responder. Tente novamente.';
+          } else if (err.status === 401 || err.status === 403) {
+            this.errorMessage = 'E-mail ou senha incorretos.';
+          } else {
+            this.errorMessage = err.error?.message || 'Ocorreu um erro ao tentar entrar. Tente mais tarde.';
+          }
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  loginWithGithub(): void {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/github';
   }
 }

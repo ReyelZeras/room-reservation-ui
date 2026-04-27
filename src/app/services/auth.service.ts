@@ -24,9 +24,11 @@ export class AuthService {
     return this.http.post('/api/v1/users', payload);
   }
 
-  // MÉTODO RESTAURADO COM O CÓDIGO REAL
+  // FIM DO MOCK! Agora fazemos um POST real enviando e-mail e senha para validação
   login(email: string, password?: string): Observable<any> {
-    return this.http.get(`${this.API_URL}/dev/token?email=${email}`, { responseType: 'text' }).pipe(
+    const payload = { email, password };
+
+    return this.http.post(`${this.API_URL}/login`, payload, { responseType: 'text' }).pipe(
       switchMap(token => {
         localStorage.setItem('token', token);
         const cacheBuster = new Date().getTime();
@@ -37,26 +39,21 @@ export class AuthService {
             this.currentUserSubject.next(user);
           })
         );
-      }),
-      catchError((err: any) => throwError(() => err))
+      })
+      // REMOVIDO O catchError que quebrava o encadeamento e gerava o loop!
     );
   }
 
-  // NOVO MÉTODO PARA PROCESSAR O LOGIN SOCIAL
   processSocialLogin(token: string): Observable<any> {
-    // 1. Salva o token que veio da URL
     localStorage.setItem('token', token);
-
     const cacheBuster = new Date().getTime();
 
-    // 2. Com o token em mãos, bate na rota /me para descobrir quem é o usuário
     return this.http.get<User>(`${this.API_URL}/me?cb=${cacheBuster}`).pipe(
       tap(user => {
         localStorage.setItem('currentUser', JSON.stringify(user));
         this.currentUserSubject.next(user);
       }),
       catchError((err: any) => {
-        // Se falhar o /me, destroi o token falso/vencido da URL
         localStorage.removeItem('token');
         return throwError(() => err);
       })
@@ -68,29 +65,21 @@ export class AuthService {
   }
 
   logout(): void {
-    // 1. Tenta forçar a invalidação do JSESSIONID no Spring Security
     this.http.post(`${this.API_URL}/logout`, {}).pipe(
-      catchError(() => of(null)) // Ignora erro caso o endpoint não exista no backend
+      catchError(() => of(null))
     ).subscribe(() => {
       this.executeLocalLogout();
     });
-
-    // 2. Fallback garantido caso a rede falhe
     setTimeout(() => this.executeLocalLogout(), 500);
   }
 
   private executeLocalLogout(): void {
-    // Destrói todas as provas de sessão local
     localStorage.clear();
     sessionStorage.clear();
     this.currentUserSubject.next(null);
-
-    // Truque agressivo: Apaga forçadamente cookies de sessão acessíveis via JS
     document.cookie.split(";").forEach((c) => {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
-
-    // Recarrega a aplicação do zero
     window.location.href = '/';
   }
 
