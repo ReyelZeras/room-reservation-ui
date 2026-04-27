@@ -9,6 +9,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { RoomsComponent } from './pages/rooms/rooms';
+import { VerifyComponent } from './pages/verify/verify.component';
 
 import { NavbarComponent } from './components/navbar/navbar.component'; // Ajuste este caminho para onde o ficheiro estiver!
 
@@ -29,7 +30,8 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
     RegisterComponent,
     ProfileComponent,   // ADICIONADO
     MyBookingsComponent, // ADICIONADO // CORREÇÃO: Declarado corretamente
-    NavbarComponent
+    NavbarComponent,
+    VerifyComponent
 
   ],
   imports: [
