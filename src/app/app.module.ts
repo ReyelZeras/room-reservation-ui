@@ -12,11 +12,12 @@ import { RoomsComponent } from './pages/rooms/rooms';
 import { VerifyComponent } from './pages/verify/verify.component';
 import { ProfileComponent } from './pages/profile/profile';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings';
-
-// IMPORTAÇÃO DOS NOVOS COMPONENTES
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
-import { AdminRoomsComponent } from './pages/admin-rooms/admin-rooms.components';
+import { AdminRoomsComponent } from './pages/admin-rooms/admin-rooms.component';
+
+// IMPORTADO: O novo componente
+import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
@@ -30,17 +31,18 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
     RegisterComponent,
     ProfileComponent,
     MyBookingsComponent,
-    AdminRoomsComponent,
     NavbarComponent,
     VerifyComponent,
-    ForgotPasswordComponent, // DECLARADO AQUI
-    ResetPasswordComponent   // DECLARADO AQUI
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    AdminRoomsComponent,
+    AdminUsersComponent // DECLARADO: Para o Angular saber que ele existe
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule,         // Essencial para o ngModel
-    ReactiveFormsModule, // Essencial para o formGroup
+    FormsModule,
+    ReactiveFormsModule,
     HttpClientModule
   ],
   providers: [
