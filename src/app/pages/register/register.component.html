@@ -13,60 +13,53 @@
 
     <form class="mt-8 space-y-4" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-      <!-- Nome -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
         <input formControlName="name" type="text" class="appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
       </div>
 
-      <!-- Username -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Nome de Usuário</label>
         <input formControlName="username" type="text" class="appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="ex: joaosilva">
       </div>
 
-      <!-- E-mail -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">E-mail Corporativo</label>
         <input formControlName="email" type="email" class="appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
       </div>
 
-      <!-- Senha Segura -->
+      <!-- Senha com Olho Alinhado -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Senha Segura</label>
-        <div class="relative">
+        <div class="relative flex items-center">
           <input formControlName="password" [type]="showPassword ? 'text' : 'password'" class="appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10">
-          <button type="button" (click)="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+          <button type="button" (click)="togglePasswordVisibility()" class="absolute right-0 pr-3 flex items-center h-full text-gray-400 hover:text-gray-600 focus:outline-none">
             <svg *ngIf="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
             <svg *ngIf="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
         </div>
-        <!-- Aviso de Regex falhada -->
         <p *ngIf="registerForm.get('password')?.hasError('pattern') && registerForm.get('password')?.touched" class="mt-1 text-xs text-red-600">
           A senha deve ter no mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial (!&#64;#$%).
         </p>
       </div>
 
-      <!-- Repetir Senha -->
+      <!-- Repetir Senha com Olho Alinhado -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Repetir Senha</label>
-        <div class="relative">
+        <div class="relative flex items-center">
           <input formControlName="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" class="appearance-none rounded-md block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10">
-          <button type="button" (click)="toggleConfirmPasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+          <button type="button" (click)="toggleConfirmPasswordVisibility()" class="absolute right-0 pr-3 flex items-center h-full text-gray-400 hover:text-gray-600 focus:outline-none">
             <svg *ngIf="!showConfirmPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
             <svg *ngIf="showConfirmPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
         </div>
-        <!-- Aviso de Senhas diferentes -->
         <p *ngIf="registerForm.get('confirmPassword')?.hasError('mismatch') && registerForm.get('confirmPassword')?.touched" class="mt-1 text-xs text-red-600">
           As senhas não coincidem.
         </p>
       </div>
 
-      <!-- Erro Global -->
       <div *ngIf="errorMessage" class="text-red-500 text-sm text-center font-medium mt-2">{{ errorMessage }}</div>
 
-      <!-- Botão Submeter -->
       <div class="pt-2">
         <button type="submit" [disabled]="isLoading" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-colors">
           <span class="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -78,7 +71,7 @@
     </form>
   </div>
 
-  <!-- NOSSO MODAL NATIVO DE SUCESSO -->
+  <!-- MODAL DE SUCESSO CORRIGIDO -->
   <div *ngIf="showSuccessModal" class="fixed z-10 inset-0 overflow-y-auto">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -89,9 +82,9 @@
             <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           </div>
           <div class="mt-3 text-center sm:mt-5">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Sucesso!</h3>
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Quase lá!</h3>
             <div class="mt-2">
-              <p class="text-sm text-gray-500">Cadastro realizado com sucesso! Faça login para continuar.</p>
+              <p class="text-sm text-gray-500">Cadastro realizado com sucesso! Enviamos um link de confirmação para o seu e-mail. <strong>Por favor, ative a sua conta antes de fazer login.</strong></p>
             </div>
           </div>
         </div>

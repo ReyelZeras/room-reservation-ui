@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // ADICIONADO: Necessário para os formulários
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -10,15 +10,14 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { RoomsComponent } from './pages/rooms/rooms';
 import { VerifyComponent } from './pages/verify/verify.component';
-
-import { NavbarComponent } from './components/navbar/navbar.component'; // Ajuste este caminho para onde o ficheiro estiver!
-
-
 import { ProfileComponent } from './pages/profile/profile';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings';
 
+// IMPORTAÇÃO DOS NOVOS COMPONENTES
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
-// Se o nome do arquivo do interceptor for diferente, ajuste aqui. Assumindo auth-interceptor baseado no PDF.
+import { NavbarComponent } from './components/navbar/navbar.component';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 
 @NgModule({
@@ -28,17 +27,18 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
     LoginComponent,
     RoomsComponent,
     RegisterComponent,
-    ProfileComponent,   // ADICIONADO
-    MyBookingsComponent, // ADICIONADO // CORREÇÃO: Declarado corretamente
+    ProfileComponent,
+    MyBookingsComponent,
     NavbarComponent,
-    VerifyComponent
-
+    VerifyComponent,
+    ForgotPasswordComponent, // DECLARADO AQUI
+    ResetPasswordComponent   // DECLARADO AQUI
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule,
-    ReactiveFormsModule, // OBRIGATÓRIO PARA O [formGroup] FUNCIONAR
+    FormsModule,         // Essencial para o ngModel
+    ReactiveFormsModule, // Essencial para o formGroup
     HttpClientModule
   ],
   providers: [

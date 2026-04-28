@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router'; // ActivatedRoute adicionado!
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { timeout } from 'rxjs/operators';
 
@@ -19,7 +19,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute, // Injetado para ler os parâmetros da URL
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
@@ -29,19 +29,14 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Escuta a URL para ver se o backend nos enviou de volta do GitHub com um token
     this.route.queryParams.subscribe(params => {
       const token = params['token'];
       if (token) {
         this.isLoading = true;
         this.cdr.detectChanges();
-
-        // Usa o método que já tínhamos no AuthService para processar logins sociais
         this.authService.processSocialLogin(token).subscribe({
-          next: () => {
-            this.router.navigate(['/rooms']);
-          },
-          error: (err: any) => {
+          next: () => { this.router.navigate(['/rooms']); },
+          error: () => {
             this.isLoading = false;
             this.errorMessage = 'Erro ao sincronizar com o GitHub.';
             this.cdr.detectChanges();
@@ -77,7 +72,10 @@ export class LoginComponent implements OnInit {
 
           if (err.name === 'TimeoutError') {
             this.errorMessage = 'O servidor demorou muito para responder. Tente novamente.';
-          } else if (err.status === 401 || err.status === 403) {
+          } else if (err.status === 403 || (err.error && err.error.message && err.error.message.includes('inativa'))) {
+            // CORREÇÃO: Captura perfeitamente a exceção de conta inativa
+            this.errorMessage = 'A sua conta está inativa. Por favor, verifique a sua caixa de e-mail e clique no link de ativação.';
+          } else if (err.status === 401) {
             this.errorMessage = 'E-mail ou senha incorretos.';
           } else {
             this.errorMessage = err.error?.message || 'Ocorreu um erro ao tentar entrar. Tente mais tarde.';
