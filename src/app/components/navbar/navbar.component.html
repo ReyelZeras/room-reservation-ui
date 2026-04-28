@@ -1,17 +1,20 @@
 <nav class="bg-blue-700 p-4 text-white shadow-lg">
   <div class="max-w-7xl mx-auto flex justify-between items-center w-full px-4 sm:px-6 lg:px-8">
-    
+
     <!-- Logo e Título -->
     <div class="flex items-center space-x-3">
       <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner cursor-pointer" routerLink="/">R</div>
       <h1 class="text-xl font-bold tracking-wide cursor-pointer" routerLink="/">RoomRes</h1>
     </div>
-    
+
     <!-- Links Centrais (Visíveis apenas em Desktop) -->
     <div class="hidden md:flex space-x-6 items-center flex-grow justify-center">
       <a routerLink="/rooms" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent">Catálogo de Salas</a>
       <a routerLink="/my-bookings" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Minhas Reservas</a>
       <a routerLink="/profile" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Meu Perfil</a>
+
+      <!-- ABA DO ADMINISTRADOR: Só aparece se o role for ADMIN -->
+      <a *ngIf="authService.currentUserValue?.role === 'ADMIN'" routerLink="/admin/rooms" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Gestão de Salas</a>
     </div>
 
     <!-- Perfil e Logout -->

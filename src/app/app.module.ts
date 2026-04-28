@@ -16,6 +16,7 @@ import { MyBookingsComponent } from './pages/my-bookings/my-bookings';
 // IMPORTAÇÃO DOS NOVOS COMPONENTES
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { AdminRoomsComponent } from './pages/admin-rooms/admin-rooms.components';
 
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
@@ -29,6 +30,7 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
     RegisterComponent,
     ProfileComponent,
     MyBookingsComponent,
+    AdminRoomsComponent,
     NavbarComponent,
     VerifyComponent,
     ForgotPasswordComponent, // DECLARADO AQUI
