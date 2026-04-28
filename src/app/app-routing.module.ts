@@ -15,7 +15,7 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
 
 import { AuthGuard } from './core/guards/auth-guard';
 import { AdminGuard } from './core/guards/admin-guard';
-
+import { AdminRoomsComponent } from './pages/admin-rooms/admin-rooms.components';
 
 const routes: Routes = [
 
@@ -35,6 +35,7 @@ const routes: Routes = [
   // Rota de Teste para o AdminGuard
   // CORREÇÃO: Alterado de SuggestionsComponent para HomeComponent para não dar erro de importação
   { path: 'admin-test', component: HomeComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin/rooms', component: AdminRoomsComponent, canActivate: [AuthGuard, AdminGuard] },
 
   { path: '**', redirectTo: '' }
 ];
