@@ -2,6 +2,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface Booking {
+  id?: string;
+  userId?: string;
+  roomId: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  status?: string;
+  createdAt?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -10,17 +21,17 @@ export class BookingService {
 
   constructor(private http: HttpClient) {}
 
-  createBooking(payload: any): Observable<any> {
-    return this.http.post(this.apiUrl, payload);
+  // CORREÇÃO 1: Exige o userId e bate na rota correta do Backend
+  getMyBookings(userId: string): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.apiUrl}/user/${userId}`);
   }
 
-  // MÉTODO ADICIONADO PARA BUSCAR HISTÓRICO DO USUÁRIO
-  getBookingsByUser(userId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`);
+  createBooking(booking: any): Observable<Booking> {
+    return this.http.post<Booking>(this.apiUrl, booking);
   }
 
-  // MÉTODO ADICIONADO PARA CANCELAR RESERVA
-  cancelBooking(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}/cancel`);
+  // CORREÇÃO 2: O seu Backend espera um DELETE e não um PUT
+  cancelBooking(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/cancel`);
   }
 }
