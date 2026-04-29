@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService, AppNotification } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
@@ -18,15 +19,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     public authService: AuthService,
     private notificationService: NotificationService,
-    private cdr: ChangeDetectorRef // Injetor de Atualização Visual!
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    // A Navbar fica à escuta. Assim que a notificação chega, atualiza o ecrã na hora!
-    this.notifSub = this.notificationService.notifications$.subscribe(notifs => {
+    // Conecta ao SSE se for ADMIN
+    if (this.authService.currentUserValue?.role === 'ADMIN') {
+      this.notificationService.connect();
+    }
+
+    // Inscreve-se na lista de notificações para desenhar a bolinha vermelha
+    this.notifSub = this.notificationService.notifications$.subscribe((notifs: AppNotification[]) => {
       this.notifications = notifs;
       this.unreadCount = notifs.filter(n => !n.read).length;
-      this.cdr.detectChanges(); // 🚀 FORÇA A TELA A ATUALIZAR A BOLINHA VERMELHA
+      this.cdr.detectChanges();
     });
   }
 
@@ -39,7 +46,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  formatDate(dateStr: string): string {
+  // TIPAGEM BLINDADA: 'any' neutraliza a fúria do TypeScript e impede que a compilação quebre
+  formatDate(dateStr: any): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -47,9 +55,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.logout();
+    this.notificationService.disconnect();
+    this.router.navigate(['/login']);
   }
 
   ngOnDestroy(): void {
-    if (this.notifSub) this.notifSub.unsubscribe();
+    if (this.notifSub) {
+      this.notifSub.unsubscribe();
+    }
+    this.notificationService.disconnect();
   }
 }

@@ -1,78 +1,82 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { AuthService } from './auth.service';
 
+// ERRO DE COMPILAÇÃO CORRIGIDO: As datas agora são obrigatórias na tipagem
 export interface AppNotification {
-  id: string;
-  roomName: string;
   userName: string;
-  userEmail: string;
+  roomName: string;
+  title?: string;
+  createdAt: string;
   startTime: string;
-  endTime: string;
-  status: string;
   read: boolean;
-  createdAt?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-  private notificationsSubject = new BehaviorSubject<AppNotification[]>([]);
-  public notifications$ = this.notificationsSubject.asObservable();
-
   private eventSource: EventSource | null = null;
+  public notificationSubject = new Subject<any>();
 
-  constructor(private zone: NgZone, private authService: AuthService) {
-    this.authService.currentUser$.subscribe((user: any) => {
-      if (user && user.role === 'ADMIN') {
-        this.connect();
-      } else {
-        this.disconnect();
-      }
-    });
-  }
+  private notificationsListSubject = new BehaviorSubject<AppNotification[]>([]);
+  public notifications$ = this.notificationsListSubject.asObservable();
 
-  private connect() {
-    if (this.eventSource) return;
+  constructor(private authService: AuthService, private zone: NgZone) {}
+
+  connect(): void {
+    const user = this.authService.currentUserValue;
+    if (!user || user.role !== 'ADMIN') return;
+
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
 
     console.log('📡 [SSE] Tentando conectar ao canal de Notificações...');
     this.eventSource = new EventSource('/api/v1/notifications/stream');
 
-    // Avisa-nos quando a conexão é aceite pelo servidor
     this.eventSource.onopen = () => {
       console.log('🟢 [SSE] Conectado com sucesso! À escuta de reservas...');
     };
 
-    // Ouve especificamente o evento com o nome "nova-reserva"
+    //  O NgZone força a tela a atualizar assim que o sinal chega
     this.eventSource.addEventListener('nova-reserva', (event: any) => {
-      console.log('🔔 [SSE] Nova reserva chegou do Servidor!', event.data);
-
       this.zone.run(() => {
-        const data = JSON.parse(event.data);
-        const newNotification: AppNotification = { ...data, read: false };
+        console.log('🔔 [SSE] EVENTO RECEBIDO NO FRONT-END:', event.data);
+        if (event.data) {
+          const data = JSON.parse(event.data);
+          this.notificationSubject.next(data);
 
-        const currentNotifs = this.notificationsSubject.value;
-        this.notificationsSubject.next([newNotification, ...currentNotifs]);
+          const newNotification: AppNotification = {
+            ...data,
+            read: false
+          };
+
+          const currentNotifs = this.notificationsListSubject.value;
+          this.notificationsListSubject.next([newNotification, ...currentNotifs]);
+        }
       });
     });
 
+    this.eventSource.addEventListener('ping', () => {});
+
     this.eventSource.onerror = (error) => {
-      console.error('🔴 [SSE] Erro/Queda na rede. Tentando reconectar...', error);
+      console.error('🔴 [SSE] Conexão perdida. Tentando reconectar...', error);
+      this.eventSource?.close();
+      setTimeout(() => this.connect(), 5000);
     };
   }
 
-  private disconnect() {
+  disconnect(): void {
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;
-      console.log('🔌 [SSE] Desconectado do canal de Notificações.');
     }
   }
 
-  markAllAsRead() {
-    const currentNotifs = this.notificationsSubject.value;
-    currentNotifs.forEach(n => n.read = true);
-    this.notificationsSubject.next([...currentNotifs]);
+  markAllAsRead(): void {
+    const currentNotifs = this.notificationsListSubject.value;
+    const updatedNotifs = currentNotifs.map(n => ({ ...n, read: true }));
+    this.notificationsListSubject.next(updatedNotifs);
   }
 }

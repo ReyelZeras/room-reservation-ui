@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+  import { TestBed } from '@angular/core/testing';
 
-import { Booking } from './booking';
+  import { Booking } from './booking';
 
-describe('Booking', () => {
-  let service: Booking;
+  describe('Booking', () => {
+    let service: Booking;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Booking);
+    beforeEach(() => {
+      TestBed.configureTestingModule({});
+      service = TestBed.inject(Booking);
+    });
+
+    it('should be created', () => {
+      expect(service).toBeTruthy();
+    });
   });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-});
