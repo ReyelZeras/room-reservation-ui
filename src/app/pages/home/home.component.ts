@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { SuggestionService } from '../../services/suggestion.service';
@@ -10,42 +10,54 @@ import { Suggestion } from '../../models/suggestion';
   standalone: false
 })
 export class HomeComponent implements OnInit {
-  // Variáveis exigidas pelo HTML
   suggestions: Suggestion[] = [];
   isLoading = true;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private suggestionService: SuggestionService
+    private suggestionService: SuggestionService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // 🛡️ INTERCEPTOR DA HOME: Verifica a sessão usando a função correta do AuthService
+    console.log('🚀 Iniciando Home Component...');
+
     if (this.authService.isAuthenticated()) {
+      console.log('✅ Utilizador logado detectado. Redirecionando para o Dashboard...');
       this.router.navigate(['/rooms']);
-      return; // Interrompe a execução para não carregar a Home
+      return;
     }
 
-    // Se não estiver logado, carrega as sugestões do Quarkus
+    console.log('⏳ Utilizador visitante. Chamando o Quarkus para obter sugestões...');
     this.loadSuggestions();
   }
 
   loadSuggestions(): void {
     this.isLoading = true;
+
     this.suggestionService.getTopSuggestions().subscribe({
-      next: (data) => {
-        this.suggestions = data;
+      next: (data: any[]) => {
+        console.log('🟢 Sucesso! Resposta ultrarrápida do Quarkus chegou:', data);
+
+        // 🚀 CORREÇÃO: Usando 'roomName' para bater certinho com a Interface Suggestion!
+        this.suggestions = data.map(s => ({
+          roomName: s.roomName || s.name,
+          description: s.description,
+          capacity: s.capacity
+        }));
+
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao carregar sugestões do Quarkus', err);
+        console.error('🔴 Erro ao buscar sugestões no Quarkus:', err);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  // Função chamada pelos botões da Home
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
