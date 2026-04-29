@@ -19,7 +19,7 @@ export class RoomsComponent implements OnInit {
   isSubmittingBooking = false;
 
   bookingErrorMessage = '';
-  bookingSuccessMessage = ''; // Esta mensagem agora vai aparecer na tela principal
+  bookingSuccessMessage = '';
 
   minDate: string = '';
 
@@ -31,6 +31,7 @@ export class RoomsComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.bookingForm = this.fb.group({
+      title: ['', Validators.required], // O TÍTULO FOI ADICIONADO AQUI
       startTime: ['', Validators.required],
       endTime: ['', Validators.required]
     });
@@ -96,9 +97,11 @@ export class RoomsComponent implements OnInit {
       return;
     }
 
+    // 🚀 A CORREÇÃO ESTÁ AQUI: Enviamos o title no payload!
     const payload = {
       userId: userId,
       roomId: this.selectedRoom.id,
+      title: this.bookingForm.value.title,
       startTime: start,
       endTime: end
     };
@@ -130,11 +133,10 @@ export class RoomsComponent implements OnInit {
 
   private processBookingSuccess(): void {
     this.isSubmittingBooking = false;
-    this.closeModal(); // Fecha o modal imediatamente
+    this.closeModal();
     this.bookingSuccessMessage = 'Reserva concluída com sucesso!';
     this.cdr.detectChanges();
 
-    // Apaga a mensagem verde após 5 segundos
     setTimeout(() => {
       this.bookingSuccessMessage = '';
       this.cdr.detectChanges();
