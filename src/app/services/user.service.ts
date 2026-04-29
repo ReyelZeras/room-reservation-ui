@@ -39,4 +39,10 @@ export class UserService {
   changePassword(id: string, payload: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/password`, payload);
   }
+
+
+  // Envia o pedido para Ativar/Inativar
+  toggleUserStatus(id: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/status`, {});
+  }
 }
