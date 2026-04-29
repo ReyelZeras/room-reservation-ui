@@ -25,8 +25,18 @@ export class UserService {
     return this.http.get<UserProfile[]>(this.apiUrl);
   }
 
+  // Atualiza os dados básicos do Perfil (Nome, E-mail)
+ updateUser(id: string, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, payload);
+  }
+
   // Altera o privilégio do usuário (Ex: de USER para ADMIN)
   updateUserRole(id: string, newRole: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, { role: newRole });
+  }
+
+    // NOVA FUNCIONALIDADE: Endpoint para atualizar a senha
+  changePassword(id: string, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/password`, payload);
   }
 }
