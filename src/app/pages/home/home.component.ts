@@ -40,7 +40,7 @@ export class HomeComponent implements OnInit {
       next: (data: any[]) => {
         console.log('🟢 Sucesso! Resposta ultrarrápida do Quarkus chegou:', data);
 
-        // 🚀 CORREÇÃO: Usando 'roomName' para bater certinho com a Interface Suggestion!
+        // CORREÇÃO: Usando 'roomName' para bater certinho com a Interface Suggestion!
         this.suggestions = data.map(s => ({
           roomName: s.roomName || s.name,
           description: s.description,

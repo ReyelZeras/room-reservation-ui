@@ -2,144 +2,164 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { BookingService } from '../../services/booking.service';
 import { AuthService } from '../../services/auth.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-rooms',
+  standalone: false,
   templateUrl: './rooms.html',
-  standalone: false
+  styleUrls: ['./rooms.css']
 })
 export class RoomsComponent implements OnInit {
   rooms: any[] = [];
-  isLoading = true;
+  filteredRooms: any[] = [];
 
+  // Filtros
+  searchTerm: string = '';
+  searchStart: string = '';
+  searchEnd: string = '';
+  isSearchingAvailability: boolean = false;
+  availabilityError: string = '';
+
+  // Modal
+  showBookingModal = false;
   selectedRoom: any = null;
-  isModalOpen = false;
-  bookingForm: FormGroup;
-  isSubmittingBooking = false;
-
-  bookingErrorMessage = '';
-  bookingSuccessMessage = '';
-
-  minDate: string = '';
+  bookingTitle: string = '';
+  bookingStart: string = '';
+  bookingEnd: string = '';
+  errorMessage: string = '';
+  showSuccessModal = false;
 
   constructor(
     private roomService: RoomService,
     private bookingService: BookingService,
     private authService: AuthService,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.bookingForm = this.fb.group({
-      title: ['', Validators.required], // O TÍTULO FOI ADICIONADO AQUI
-      startTime: ['', Validators.required],
-      endTime: ['', Validators.required]
+    private cdr: ChangeDetectorRef // 🚀 INJETADO PARA FORÇAR ATUALIZAÇÃO DA TELA
+  ) {}
+
+  ngOnInit() {
+    this.loadRooms();
+  }
+
+  loadRooms() {
+    this.isSearchingAvailability = false;
+    this.roomService.getAllRooms().subscribe({
+      next: (data: any) => {
+        this.rooms = data.content ? data.content : data;
+        this.filteredRooms = [...this.rooms]; // 🚀 PREENCHE AS SALAS LOGO NO INÍCIO
+        this.cdr.detectChanges(); // 🚀 FORÇA O ANGULAR A DESENHAR A TELA
+      },
+      error: (err: any) => console.error('Erro ao carregar salas', err)
     });
   }
 
-  ngOnInit(): void {
-    this.loadRooms();
-
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    this.minDate = now.toISOString().slice(0, 16);
+  applyFilters() {
+    let tempRooms = [...this.rooms];
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      tempRooms = tempRooms.filter(r =>
+        (r.name && r.name.toLowerCase().includes(term)) ||
+        (r.status && r.status.toLowerCase().includes(term)) ||
+        (r.description && r.description.toLowerCase().includes(term))
+      );
+    }
+    this.filteredRooms = tempRooms;
+    this.cdr.detectChanges(); // Força atualização ao digitar
   }
 
-  loadRooms(): void {
-    this.isLoading = true;
-    this.roomService.getAllRooms().subscribe({
+  checkAvailability() {
+    this.availabilityError = '';
+
+    if (!this.searchStart || !this.searchEnd) {
+      this.availabilityError = 'Preencha início e fim para verificar.';
+      return;
+    }
+
+    const startStr = this.formatDateForBackend(this.searchStart);
+    const endStr = this.formatDateForBackend(this.searchEnd);
+
+    this.bookingService.checkAvailability(startStr, endStr).subscribe({
       next: (data: any) => {
-        this.rooms = data;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.rooms = data.content ? data.content : data;
+        this.isSearchingAvailability = true;
+        this.applyFilters();
       },
       error: (err: any) => {
-        console.error('Erro ao carregar salas', err);
-        this.isLoading = false;
+        this.availabilityError = 'Erro ao verificar disponibilidade.';
         this.cdr.detectChanges();
       }
     });
   }
 
-  openBookingModal(room: any): void {
+  clearSearch() {
+    this.searchTerm = '';
+    this.searchStart = '';
+    this.searchEnd = '';
+    this.availabilityError = '';
+    this.loadRooms();
+  }
+
+  openBookingModal(room: any) {
     this.selectedRoom = room;
-    this.isModalOpen = true;
-    this.bookingErrorMessage = '';
-    this.bookingSuccessMessage = '';
-    this.bookingForm.reset();
+    this.bookingTitle = '';
+    this.bookingStart = this.searchStart;
+    this.bookingEnd = this.searchEnd;
+    this.errorMessage = '';
+    this.showBookingModal = true;
   }
 
-  closeModal(): void {
-    this.isModalOpen = false;
+  closeBookingModal() {
+    this.showBookingModal = false;
     this.selectedRoom = null;
-    this.bookingErrorMessage = '';
+    this.errorMessage = '';
   }
 
-  submitBooking(): void {
-    if (this.bookingForm.invalid || !this.selectedRoom) return;
+  formatDateForBackend(dateStr: string): string {
+    if (dateStr && dateStr.length === 16) {
+      return dateStr + ':00';
+    }
+    return dateStr;
+  }
 
-    this.isSubmittingBooking = true;
-    this.bookingErrorMessage = '';
-    this.cdr.detectChanges();
-
-    let start = this.bookingForm.value.startTime;
-    let end = this.bookingForm.value.endTime;
-
-    if (start && start.length === 16) start += ':00';
-    if (end && end.length === 16) end += ':00';
-
-    const userId = this.authService.currentUserValue?.id;
-
-    if (!userId) {
-      this.bookingErrorMessage = 'Sessão expirada. Por favor, faça login novamente.';
-      this.isSubmittingBooking = false;
-      this.cdr.detectChanges();
+  confirmBooking() {
+    if (!this.bookingTitle) {
+      this.errorMessage = "Por favor, insira o título da reserva.";
       return;
     }
 
-    // 🚀 A CORREÇÃO ESTÁ AQUI: Enviamos o title no payload!
+    if (!this.bookingStart || !this.bookingEnd) {
+       this.errorMessage = "Por favor, preencha as datas de início e fim.";
+       return;
+    }
+
+    const userId = this.authService.currentUserValue?.id;
+    if (!userId) return;
+
     const payload = {
       userId: userId,
       roomId: this.selectedRoom.id,
-      title: this.bookingForm.value.title,
-      startTime: start,
-      endTime: end
+      title: this.bookingTitle,
+      startTime: this.formatDateForBackend(this.bookingStart),
+      endTime: this.formatDateForBackend(this.bookingEnd)
     };
 
     this.bookingService.createBooking(payload).subscribe({
       next: () => {
-        this.processBookingSuccess();
+        this.closeBookingModal();
+        this.showSuccessModal = true;
+        if (this.isSearchingAvailability) {
+           this.checkAvailability();
+        } else {
+           this.loadRooms();
+        }
       },
       error: (err: any) => {
-        this.isSubmittingBooking = false;
-
-        // Falso erro do Angular (Problema de Parse do JSON em Status 201)
-        if (err.status === 201 || err.status === 200) {
-            this.processBookingSuccess();
-            return;
-        }
-
-        // Erro 422 Genuíno (Sala ocupada)
-        if (err.status === 422) {
-           this.bookingErrorMessage = err.error?.erro || 'A sala já está reservada para o período selecionado.';
-        } else {
-           this.bookingErrorMessage = err.error?.message || 'Ocorreu um erro ao processar a sua reserva.';
-        }
-
+        this.errorMessage = err.error?.message || 'Erro ao criar reserva. Horário indisponível.';
         this.cdr.detectChanges();
       }
     });
   }
 
-  private processBookingSuccess(): void {
-    this.isSubmittingBooking = false;
-    this.closeModal();
-    this.bookingSuccessMessage = 'Reserva concluída com sucesso!';
-    this.cdr.detectChanges();
-
-    setTimeout(() => {
-      this.bookingSuccessMessage = '';
-      this.cdr.detectChanges();
-    }, 5000);
+  closeSuccessModal() {
+    this.showSuccessModal = false;
   }
 }
