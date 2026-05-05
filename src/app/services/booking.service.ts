@@ -34,11 +34,9 @@ export class BookingService {
   }
 
   cancelBooking(bookingId: string): Observable<any> {
-    // Mantém o histórico com Soft Delete
     return this.http.delete(`${this.apiUrl}/${bookingId}/cancel`);
   }
 
-  // --- NOVAS FUNCIONALIDADES ---
   checkAvailability(start: string, end: string): Observable<any[]> {
     const params = new HttpParams().set('start', start).set('end', end);
     return this.http.get<any[]>(`${this.apiUrl}/availability`, { params });
@@ -47,5 +45,10 @@ export class BookingService {
   rescheduleBooking(id: string, newStart: string, newEnd: string): Observable<any> {
     const params = new HttpParams().set('newStart', newStart).set('newEnd', newEnd);
     return this.http.patch<any>(`${this.apiUrl}/${id}/reschedule`, null, { params });
+  }
+
+  // --- NOVA FUNCIONALIDADE: Buscar Reservas Específicas de Uma Sala ---
+  getRoomBookings(roomId: string): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.apiUrl}/room/${roomId}`);
   }
 }
