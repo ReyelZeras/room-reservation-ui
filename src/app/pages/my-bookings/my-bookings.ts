@@ -19,121 +19,115 @@ import { forkJoin } from 'rxjs';
           </div>
         </div>
 
-        <div *ngIf="message" class="mb-4 p-4 rounded-md bg-green-50 text-green-700 text-sm font-medium transition-all shadow-sm border border-green-100">
+        <div *ngIf="message" class="mb-4 p-4 rounded-md bg-green-50 text-green-700 text-sm font-medium shadow-sm border border-green-100">
           {{ message }}
         </div>
-        <div *ngIf="errorMessage" class="mb-4 p-4 rounded-md bg-red-50 text-red-700 text-sm font-medium transition-all shadow-sm border border-red-100">
+        <div *ngIf="errorMessage" class="mb-4 p-4 rounded-md bg-red-50 text-red-700 text-sm font-medium shadow-sm border border-red-100">
           {{ errorMessage }}
         </div>
 
-        <div *ngIf="isLoading" class="text-center py-12">
-           <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-           <p class="mt-4 text-gray-500">A carregar as suas reservas...</p>
+        <!-- BARRA DE PESQUISA E FILTROS -->
+        <div class="mb-6 space-y-4">
+          <div>
+            <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Pesquisar por nome da reserva ou nome da sala..." class="w-full p-2.5 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm">
+          </div>
+          <div class="flex gap-2 overflow-x-auto pb-2">
+            <button (click)="applyFilters('ALL')" [ngClass]="filterStatus === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300'" class="px-4 py-2 rounded-md text-sm font-medium transition-colors">Todas</button>
+            <button (click)="applyFilters('CONFIRMED')" [ngClass]="filterStatus === 'CONFIRMED' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 border border-gray-300'" class="px-4 py-2 rounded-md text-sm font-medium transition-colors">Confirmadas</button>
+            <button (click)="applyFilters('PENDING')" [ngClass]="filterStatus === 'PENDING' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 border border-gray-300'" class="px-4 py-2 rounded-md text-sm font-medium transition-colors">Pendentes</button>
+            <button (click)="applyFilters('CANCELLED')" [ngClass]="filterStatus === 'CANCELLED' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border border-gray-300'" class="px-4 py-2 rounded-md text-sm font-medium transition-colors">Canceladas</button>
+          </div>
         </div>
 
-        <div *ngIf="!isLoading && bookings.length === 0" class="text-center bg-white rounded-lg shadow py-12 border border-gray-200">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma reserva encontrada</h3>
-          <p class="mt-1 text-sm text-gray-500">Voce ainda nao agendou nenhuma sala.</p>
+        <div *ngIf="!isLoading && filteredBookings.length === 0" class="text-center py-10 text-gray-500 bg-white rounded-lg border border-gray-200">
+          Nenhuma reserva encontrada.
         </div>
 
-        <div *ngIf="!isLoading && bookings.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div *ngFor="let bk of bookings" class="bg-white overflow-hidden shadow rounded-lg ring-1 ring-black ring-opacity-5 flex flex-col transition-all hover:shadow-md">
-            <div class="px-4 py-5 sm:p-6 flex-grow">
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg leading-6 font-bold text-gray-900 truncate pr-2">{{ bk.title || 'Reserva Padrao' }}</h3>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shrink-0"
-                      [ngClass]="bk.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                  {{ bk.status }}
-                </span>
-              </div>
-              <p class="text-sm font-bold text-blue-600 mb-4">{{ getRoomName(bk.roomId) }}</p>
-
-              <div class="space-y-3">
-                <div class="text-sm text-gray-700 flex items-center">
-                  <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  <div>
-                    <span class="font-semibold text-gray-500 text-xs uppercase tracking-wider block">Inicio</span>
-                    {{ formatDate(bk.startTime) }}
-                  </div>
-                </div>
-                <div class="text-sm text-gray-700 flex items-center">
-                  <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  <div>
-                    <span class="font-semibold text-gray-500 text-xs uppercase tracking-wider block">Fim</span>
-                    {{ formatDate(bk.endTime) }}
-                  </div>
-                </div>
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!isLoading">
+          <div *ngFor="let booking of filteredBookings" class="bg-white rounded-xl shadow-sm border-l-4 p-6"
+               [ngClass]="{'border-green-500': booking.status === 'CONFIRMED', 'border-red-500': booking.status === 'CANCELLED', 'border-yellow-500': booking.status === 'PENDING'}">
+            <div class="flex justify-between items-start mb-4">
+              <h2 class="text-xl font-bold text-gray-900 line-clamp-1" [title]="booking.title">{{ booking.title || 'Reserva' }}</h2>
+              <span class="text-xs font-bold px-2 py-1 rounded" [ngClass]="{'bg-green-100 text-green-800': booking.status === 'CONFIRMED', 'bg-red-100 text-red-800': booking.status === 'CANCELLED', 'bg-yellow-100 text-yellow-800': booking.status === 'PENDING'}">
+                {{ booking.status }}
+              </span>
             </div>
 
-            <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-200">
-              <button *ngIf="bk.status === 'CONFIRMED'" (click)="openCancelModal(bk)"
-                      class="w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                Cancelar Reserva
-              </button>
-              <div *ngIf="bk.status === 'CANCELLED'" class="w-full flex justify-center items-center py-2 text-sm text-gray-500 font-medium italic">
-                Operacao Cancelada
-              </div>
+            <div class="space-y-2 text-sm text-gray-600 mb-6">
+              <p><span class="font-semibold">Sala:</span> {{ getRoomName(booking.roomId) }}</p>
+              <p><span class="font-semibold">Início:</span> {{ formatDate(booking.startTime) }}</p>
+              <p><span class="font-semibold">Fim:</span> {{ formatDate(booking.endTime) }}</p>
+            </div>
+
+            <div class="flex gap-2 pt-4 border-t border-gray-100" *ngIf="booking.status !== 'CANCELLED'">
+              <button (click)="openRescheduleModal(booking)" class="flex-1 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 font-medium py-2 rounded text-sm transition text-center">Remarcar</button>
+              <button (click)="openCancelModal(booking)" class="flex-1 bg-white text-red-600 hover:bg-red-50 border border-red-200 font-medium py-2 rounded text-sm transition text-center">Cancelar</button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div *ngIf="showCancelModal" class="fixed z-50 inset-0 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
-          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeCancelModal()"></div>
-          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-          <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div class="sm:flex sm:items-start">
-                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                  <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                  <h3 class="text-lg leading-6 font-medium text-gray-900">Cancelar Reserva</h3>
-                  <div class="mt-2">
-                    <p class="text-sm text-gray-500">
-                      Tem certeza que deseja cancelar a reserva <strong class="text-gray-800">{{ bookingToCancel?.title || 'desta sala' }}</strong>?
-                      <br><br>
-                      Esta ação não pode ser desfeita e o horário ficará disponível para outros colaboradores.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button type="button" (click)="confirmCancellation()" [disabled]="isCancelling"
-                      class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors disabled:opacity-50">
-                {{ isCancelling ? 'A cancelar...' : 'Sim, cancelar' }}
-              </button>
-              <button type="button" (click)="closeCancelModal()" [disabled]="isCancelling"
-                      class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors disabled:opacity-50">
-                Voltar
-              </button>
+        <!-- SEU MODAL ORIGINAL DE CANCELAR -->
+        <div *ngIf="showCancelModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm m-4">
+            <h3 class="text-xl font-bold text-gray-900 mb-2 text-center">Cancelar Reserva</h3>
+            <p class="text-sm text-gray-600 mb-6 text-center">Deseja cancelar a reserva <strong>{{ bookingToCancel?.title }}</strong>?</p>
+            <div class="flex justify-end gap-2">
+              <button (click)="closeCancelModal()" [disabled]="isCancelling" class="flex-1 px-4 py-2 border rounded text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50">Voltar</button>
+              <button (click)="confirmCancellation()" [disabled]="isCancelling" class="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium disabled:opacity-50">{{ isCancelling ? 'Processando...' : 'Confirmar' }}</button>
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- NOVO MODAL: REMARCAR -->
+        <div *ngIf="showRescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm m-4">
+            <h3 class="text-xl font-bold mb-4 text-gray-900">Remarcar Horário</h3>
+            <div *ngIf="rescheduleErrorMessage" class="mb-4 bg-red-50 text-red-600 px-4 py-3 rounded-md text-sm border border-red-200">{{ rescheduleErrorMessage }}</div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Novo Início</label>
+                <input type="datetime-local" [(ngModel)]="newStart" class="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Novo Fim</label>
+                <input type="datetime-local" [(ngModel)]="newEnd" class="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none">
+              </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-2">
+              <button (click)="closeRescheduleModal()" [disabled]="isRescheduling" class="flex-1 px-4 py-2 border text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium">Cancelar</button>
+              <button (click)="confirmReschedule()" [disabled]="isRescheduling" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 font-medium">{{ isRescheduling ? 'Salvando...' : 'Salvar' }}</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   `
 })
 export class MyBookingsComponent implements OnInit {
   bookings: Booking[] = [];
+  filteredBookings: Booking[] = [];
+  filterStatus: string = 'ALL';
+  searchTerm: string = ''; // Nova variável da barra de pesquisa
   roomMap: Map<string, string> = new Map();
   isLoading = true;
   message = '';
   errorMessage = '';
 
-  // Variaveis de controle do Modal
+  // Cancelamento
   showCancelModal = false;
   bookingToCancel: Booking | null = null;
   isCancelling = false;
+
+  // Remarcação
+  showRescheduleModal = false;
+  bookingToReschedule: Booking | null = null;
+  newStart: string = '';
+  newEnd: string = '';
+  rescheduleErrorMessage = '';
+  isRescheduling = false;
 
   constructor(
     private bookingService: BookingService,
@@ -142,28 +136,32 @@ export class MyBookingsComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadData();
   }
 
-  loadData(): void {
+  loadData() {
     this.isLoading = true;
-    const currentUser = this.authService.currentUserValue;
-    if (!currentUser) return;
+    const userId = this.authService.currentUserValue?.id;
+    if (!userId) return;
 
-    // Busca as salas e as reservas em paralelo para o mapeamento
     forkJoin({
-      rooms: this.roomService.getAllRooms(),
-      bookings: this.bookingService.getMyBookings(currentUser.id)
+      bookings: this.bookingService.getMyBookings(userId),
+      rooms: this.roomService.getAllRooms()
     }).subscribe({
       next: (result: any) => {
-        result.rooms.forEach((r: any) => this.roomMap.set(r.id, r.name));
-        this.bookings = result.bookings.sort((a: any, b: any) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+        const roomsData = result.rooms.content ? result.rooms.content : result.rooms;
+        roomsData.forEach((r: any) => this.roomMap.set(r.id, r.name));
+
+        const bookingsData = result.bookings.content ? result.bookings.content : result.bookings;
+        this.bookings = bookingsData.sort((a: any, b: any) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+
+        this.applyFilters('ALL'); // Aplica o filtro preenchendo o array
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMessage = 'Erro ao carregar as informacoes. Tente novamente.';
+        this.errorMessage = 'Erro ao carregar os dados.';
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -171,7 +169,30 @@ export class MyBookingsComponent implements OnInit {
   }
 
   getRoomName(roomId: string): string {
-    return this.roomMap.get(roomId) || 'Sala Indisponivel / Removida';
+    return this.roomMap.get(roomId) || 'Sala Indisponível';
+  }
+
+  // --- NOVA FUNCIONALIDADE: Filtro combinado (Status + Pesquisa por Texto) ---
+  applyFilters(status?: string) {
+    if (status) this.filterStatus = status;
+
+    let temp = [...this.bookings];
+
+    if (this.filterStatus !== 'ALL') {
+      temp = temp.filter(b => b.status === this.filterStatus);
+    }
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      temp = temp.filter(b => {
+        const roomName = this.getRoomName(b.roomId).toLowerCase();
+        const title = (b.title || '').toLowerCase();
+        return title.includes(term) || roomName.includes(term);
+      });
+    }
+
+    this.filteredBookings = temp;
+    this.cdr.detectChanges();
   }
 
   formatDate(dateStr: string): string {
@@ -180,7 +201,7 @@ export class MyBookingsComponent implements OnInit {
     return date.toLocaleString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
-  // --- Funcoes do Modal ---
+  // --- O SEU CÓDIGO DE CANCELAMENTO INTACTO ---
   openCancelModal(booking: Booking): void {
     this.bookingToCancel = booking;
     this.showCancelModal = true;
@@ -193,26 +214,84 @@ export class MyBookingsComponent implements OnInit {
   }
 
   confirmCancellation(): void {
-    // Adicionada a validação do ID para satisfazer o strict mode do TypeScript
     if (!this.bookingToCancel || !this.bookingToCancel.id) return;
-
     this.isCancelling = true;
     this.bookingService.cancelBooking(this.bookingToCancel.id).subscribe({
       next: () => {
         this.isCancelling = false;
         this.message = 'Reserva cancelada com sucesso!';
         this.closeCancelModal();
-        this.loadData(); // Recarrega a grelha para atualizar o status
-
+        this.loadData();
         setTimeout(() => { this.message = ''; this.cdr.detectChanges(); }, 4000);
       },
       error: () => {
         this.isCancelling = false;
-        this.errorMessage = 'Ocorreu um erro ao tentar cancelar a reserva.';
+        this.errorMessage = 'Erro ao cancelar a reserva.';
         this.closeCancelModal();
         this.cdr.detectChanges();
-
         setTimeout(() => { this.errorMessage = ''; this.cdr.detectChanges(); }, 4000);
+      }
+    });
+  }
+
+  // --- LÓGICA DE REMARCAÇÃO ---
+  openRescheduleModal(booking: Booking): void {
+    this.bookingToReschedule = booking;
+    this.newStart = booking.startTime ? booking.startTime.substring(0, 16) : '';
+    this.newEnd = booking.endTime ? booking.endTime.substring(0, 16) : '';
+    this.rescheduleErrorMessage = '';
+    this.showRescheduleModal = true;
+  }
+
+  closeRescheduleModal(): void {
+    if (this.isRescheduling) return;
+    this.showRescheduleModal = false;
+    this.bookingToReschedule = null;
+  }
+
+  formatDateForBackend(dateStr: string): string {
+    if (dateStr && dateStr.length === 16) return dateStr + ':00';
+    return dateStr;
+  }
+
+  confirmReschedule(): void {
+    if (!this.bookingToReschedule || !this.bookingToReschedule.id) return;
+    if (!this.newStart || !this.newEnd) {
+      this.rescheduleErrorMessage = "Preencha as novas datas.";
+      return;
+    }
+
+    const startDate = new Date(this.newStart);
+    const endDate = new Date(this.newEnd);
+    const now = new Date();
+
+    if (startDate < now) {
+      this.rescheduleErrorMessage = "O Início não pode ser no passado.";
+      return;
+    }
+    if (startDate >= endDate) {
+      this.rescheduleErrorMessage = "O Início deve ser antes do Fim.";
+      return;
+    }
+
+    this.isRescheduling = true;
+    this.cdr.detectChanges();
+
+    const startStr = this.formatDateForBackend(this.newStart);
+    const endStr = this.formatDateForBackend(this.newEnd);
+
+    this.bookingService.rescheduleBooking(this.bookingToReschedule.id, startStr, endStr).subscribe({
+      next: () => {
+        this.isRescheduling = false;
+        this.message = 'Reserva remarcada com sucesso!';
+        this.closeRescheduleModal();
+        this.loadData();
+        setTimeout(() => { this.message = ''; this.cdr.detectChanges(); }, 4000);
+      },
+      error: (err: any) => {
+        this.isRescheduling = false;
+        this.rescheduleErrorMessage = err.status === 409 ? 'Conflito! Sala ocupada.' : 'Erro ao remarcar.';
+        this.cdr.detectChanges();
       }
     });
   }

@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Booking {
-  id?: string;
-  userId?: string;
+  id: string;
+  userId: string;
   roomId: string;
-  title: string;
+  title?: string;
   startTime: string;
   endTime: string;
-  status?: string;
+  status: string;
   createdAt?: string;
 }
 
@@ -19,19 +19,33 @@ export interface Booking {
 export class BookingService {
   private apiUrl = '/api/v1/bookings';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // CORREÇÃO 1: Exige o userId e bate na rota correta do Backend
+  createBooking(bookingData: any): Observable<any> {
+    return this.http.post(this.apiUrl, bookingData);
+  }
+
   getMyBookings(userId: string): Observable<Booking[]> {
     return this.http.get<Booking[]>(`${this.apiUrl}/user/${userId}`);
   }
 
-  createBooking(booking: any): Observable<Booking> {
-    return this.http.post<Booking>(this.apiUrl, booking);
+  getUserBookings(userId: string): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.apiUrl}/user/${userId}`);
   }
 
-  // CORREÇÃO 2: O seu Backend espera um DELETE e não um PUT
-  cancelBooking(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}/cancel`);
+  cancelBooking(bookingId: string): Observable<any> {
+    // Mantém o histórico com Soft Delete
+    return this.http.delete(`${this.apiUrl}/${bookingId}/cancel`);
+  }
+
+  // --- NOVAS FUNCIONALIDADES ---
+  checkAvailability(start: string, end: string): Observable<any[]> {
+    const params = new HttpParams().set('start', start).set('end', end);
+    return this.http.get<any[]>(`${this.apiUrl}/availability`, { params });
+  }
+
+  rescheduleBooking(id: string, newStart: string, newEnd: string): Observable<any> {
+    const params = new HttpParams().set('newStart', newStart).set('newEnd', newEnd);
+    return this.http.patch<any>(`${this.apiUrl}/${id}/reschedule`, null, { params });
   }
 }
