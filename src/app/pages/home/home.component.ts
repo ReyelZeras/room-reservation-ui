@@ -6,12 +6,13 @@ import { Suggestion } from '../../models/suggestion';
 
 @Component({
   selector: 'app-home',
-  templateUrl: './home.component.html',
-  standalone: false
+  standalone: false,
+  templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
   suggestions: Suggestion[] = [];
   isLoading = true;
+  isLoggedIn = false; //Nova flag de estado de login
 
   constructor(
     private authService: AuthService,
@@ -21,15 +22,9 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('🚀 Iniciando Home Component...');
+    //  Apenas verifica se está logado para trocar as Navbars, SEM REDIRECIONAR!
+    this.isLoggedIn = this.authService.isAuthenticated();
 
-    if (this.authService.isAuthenticated()) {
-      console.log('✅ Utilizador logado detectado. Redirecionando para o Dashboard...');
-      this.router.navigate(['/rooms']);
-      return;
-    }
-
-    console.log('⏳ Utilizador visitante. Chamando o Quarkus para obter sugestões...');
     this.loadSuggestions();
   }
 
@@ -38,9 +33,6 @@ export class HomeComponent implements OnInit {
 
     this.suggestionService.getTopSuggestions().subscribe({
       next: (data: any[]) => {
-        console.log('🟢 Sucesso! Resposta ultrarrápida do Quarkus chegou:', data);
-
-        // CORREÇÃO: Usando 'roomName' para bater certinho com a Interface Suggestion!
         this.suggestions = data.map(s => ({
           roomName: s.roomName || s.name,
           description: s.description,
@@ -51,7 +43,6 @@ export class HomeComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('🔴 Erro ao buscar sugestões no Quarkus:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
       }

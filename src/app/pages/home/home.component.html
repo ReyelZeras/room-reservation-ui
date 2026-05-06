@@ -1,32 +1,52 @@
 <div class="min-h-screen bg-gray-50 flex flex-col">
 
-  <!-- Navbar Pública -->
-  <nav class="bg-blue-700 p-4 text-white flex justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-3 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 justify-between">
+  <!-- SE LOGADO: Mostra a Navbar interna completa -->
+  <app-navbar *ngIf="isLoggedIn"></app-navbar>
+
+  <!-- SE VISITANTE: Navbar Pública com Destaque -->
+  <nav *ngIf="!isLoggedIn" class="bg-blue-700 p-4 text-white shadow-lg">
+    <div class="flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 justify-between">
       <div class="flex items-center space-x-3">
-        <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner">R</div>
-        <h1 class="text-xl font-bold tracking-wide">RoomRes</h1>
+        <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner cursor-pointer" routerLink="/">R</div>
+        <h1 class="text-xl font-bold tracking-wide cursor-pointer" routerLink="/">RoomRes</h1>
       </div>
-      <button (click)="goToLogin()" class="bg-white text-blue-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-bold transition-all shadow hover:shadow-md">
-        Entrar no Sistema
-      </button>
+      <div class="flex items-center space-x-6">
+        <a routerLink="/about" class="hidden sm:block text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">
+          Sobre o Projeto
+        </a>
+        <button (click)="goToLogin()" class="bg-white text-blue-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-bold transition-all shadow hover:shadow-md">
+          Entrar no Sistema
+        </button>
+      </div>
     </div>
   </nav>
 
-  <!-- Hero Section (Seção Principal) -->
+  <!-- Hero Section -->
   <div class="flex-grow flex flex-col items-center justify-center text-center px-4 py-20 bg-gradient-to-b from-blue-700 to-blue-900 text-white">
     <h1 class="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight">O espaço ideal para a sua próxima grande ideia.</h1>
     <p class="text-xl md:text-2xl mb-10 max-w-2xl text-blue-100">Reserve salas de reunião corporativas em segundos. Simples, rápido e integrado.</p>
-    <button (click)="goToLogin()" class="bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
-      Fazer uma Reserva
-    </button>
+
+    <!-- Botões de Ação com o "Sobre o Projeto" em Destaque -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <button *ngIf="!isLoggedIn" (click)="goToLogin()" class="bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
+        Fazer uma Reserva
+      </button>
+
+      <button *ngIf="isLoggedIn" routerLink="/rooms" class="bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
+        Fazer uma Reserva
+      </button>
+
+      <button routerLink="/about" class="bg-transparent border-2 border-white hover:bg-white hover:text-blue-700 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
+        Sobre o Projeto
+      </button>
+    </div>
   </div>
 
   <!-- Sugestões (Consumindo Quarkus) -->
   <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 w-full">
     <div class="text-center mb-12">
       <h2 class="text-3xl font-bold text-gray-900">Salas em Destaque</h2>
-      <p class="text-gray-500 mt-2">Sugestões ultrarrápidas e em tempo real fornecidas pelo nosso motor Quarkus.</p>
+      <p class="text-gray-500 mt-2">Sugestões ultrarrápidas geradas pela nossa IA em Quarkus.</p>
     </div>
 
     <!-- Spinner de Loading -->
