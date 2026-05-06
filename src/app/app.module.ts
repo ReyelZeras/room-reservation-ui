@@ -15,7 +15,7 @@ import { AdminRoomsComponent } from './pages/admin-rooms/admin-rooms.component';
 import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
-
+import { AboutComponent } from './pages/about/about.component';
 // Caminhos corrigidos de acordo com a convenção de nomes
 import { RoomsComponent } from './pages/rooms/rooms.component';
 import { ProfileComponent } from './pages/profile/profile.component';
@@ -35,7 +35,8 @@ import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     AdminRoomsComponent,
-    AdminUsersComponent
+    AdminUsersComponent,
+    AboutComponent
   ],
   imports: [
     BrowserModule,

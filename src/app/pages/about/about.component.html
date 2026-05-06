@@ -1,0 +1,119 @@
+<!-- SE LOGADO: Mostra a Navbar interna completa -->
+<app-navbar *ngIf="authService.isAuthenticated()"></app-navbar>
+
+<!-- SE VISITANTE: Mostra a Navbar pública -->
+<nav *ngIf="!authService.isAuthenticated()" class="bg-blue-700 p-4 text-white shadow-lg">
+  <div class="flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner cursor-pointer" routerLink="/">R</div>
+      <h1 class="text-xl font-bold tracking-wide cursor-pointer" routerLink="/">RoomRes</h1>
+    </div>
+    <div class="flex items-center space-x-6">
+      <a routerLink="/" class="hidden sm:block text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">
+        Início
+      </a>
+      <button (click)="goToLogin()" class="bg-white text-blue-700 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-bold transition-all shadow hover:shadow-md">
+        Entrar no Sistema
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-5xl mx-auto space-y-12">
+
+    <!-- Cabeçalho Principal -->
+    <div class="text-center mt-6">
+      <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">RoomRes Ecosystem</h1>
+      <p class="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">Uma arquitetura cloud-native orientada a microsserviços e eventos, projetada para alta disponibilidade e resiliência.</p>
+    </div>
+
+    <!-- O Desenvolvedor -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="p-8 md:flex md:items-center md:justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">Desenvolvido por Reyel Soares</h2>
+          <p class="text-gray-600 mt-2 max-w-2xl">Desenvolvedor Back-end Java com foco em arquiteturas distribuídas, DevOps e sistemas corporativos de missão crítica.</p>
+        </div>
+        <div class="mt-6 md:mt-0 flex flex-col sm:flex-row gap-4">
+          <a href="https://www.linkedin.com/in/reyel-soares" target="_blank" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-700 hover:bg-blue-800 transition-colors shadow-sm">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://github.com/ReyelZeras" target="_blank" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arquitetura e Tecnologias -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
+
+      <!-- Back-end -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-6">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Microsserviços & Back-end</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Arquitetura dividida em 6 serviços especialistas, garantindo escalabilidade e isolamento de falhas (Database-per-Service).</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">Java 17</span>
+          <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">Spring Boot 3</span>
+          <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">Quarkus</span>
+          <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">Spring Cloud Gateway</span>
+          <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">Eureka Server</span>
+        </div>
+      </div>
+
+      <!-- Infraestrutura e Nuvem -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-6">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">DevOps & Orquestração</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Ambiente 100% containerizado com Docker Multi-stage builds e preparado para orquestração em Kubernetes.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">Docker</span>
+          <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">Kubernetes</span>
+          <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">GitHub Actions (CI/CD)</span>
+          <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">Testcontainers</span>
+          <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">Nginx</span>
+        </div>
+      </div>
+
+      <!-- Mensageria e Dados -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mb-6">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Mensageria & Dados</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Comunicação assíncrona orientada a eventos (Event-Driven) para auditoria e alta vazão de dados.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200">PostgreSQL</span>
+          <span class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200">Redis (Cache)</span>
+          <span class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200">Apache Kafka</span>
+          <span class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200">RabbitMQ</span>
+          <span class="px-3 py-1 bg-orange-50 text-orange-700 text-xs font-bold rounded-full border border-orange-200">Spring Batch</span>
+        </div>
+      </div>
+
+      <!-- Resiliência e Observabilidade -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-6">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Resiliência & Observabilidade</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Monitoramento de saúde do cluster, rastreabilidade ponta a ponta e tolerância a falhas na comunicação.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-200">Resilience4j (Circuit Breaker)</span>
+          <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-200">Zipkin (Tracing)</span>
+          <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-200">Prometheus & Grafana</span>
+          <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-200">Spring WebFlux (SSE)</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

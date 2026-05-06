@@ -13,6 +13,8 @@ import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { AuthGuard } from './core/guards/auth-guard';
 import { AdminGuard } from './core/guards/admin-guard';
 
+import { AboutComponent } from './pages/about/about.component';
+
 // Caminhos corrigidos de acordo com a convenção de nomes
 import { RoomsComponent } from './pages/rooms/rooms.component';
 import { ProfileComponent } from './pages/profile/profile.component';
@@ -20,6 +22,7 @@ import { MyBookingsComponent } from './pages/my-bookings/my-bookings.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, data: { title: 'RoomRes - Início' } },
+  { path: 'about', component: AboutComponent, data: { title: 'Sobre o Projeto - RoomRes' } },
   { path: 'login', component: LoginComponent, data: { title: 'Login - RoomRes' } },
   { path: 'register', component: RegisterComponent, data: { title: 'Criar Conta - RoomRes' } },
   { path: 'verify', component: VerifyComponent, data: { title: 'Verificação - RoomRes' } },
