@@ -5,8 +5,9 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
-  templateUrl: './register.component.html',
+  templateUrl: './register.component.html', // APONTA PARA A CONVENÇÃO
   standalone: false
+  // REMOVIDO O styleUrls
 })
 export class RegisterComponent {
   registerForm: FormGroup;
@@ -14,7 +15,6 @@ export class RegisterComponent {
   errorMessage = '';
   showSuccessModal = false;
 
-  // Variáveis para os botões de olho
   showPassword = false;
   showConfirmPassword = false;
 
@@ -24,7 +24,6 @@ export class RegisterComponent {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
-    // Regex de Segurança Máxima: Mínimo 8 chars, 1 Número, 1 Maiúscula, 1 Caractere Especial
     const passwordRegex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>_\-+=]).{8,}$/;
 
     this.registerForm = this.fb.group({
@@ -33,10 +32,9 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.pattern(passwordRegex)]],
       confirmPassword: ['', Validators.required]
-    }, { validators: this.passwordMatchValidator }); // Ativa o validador cruzado no formulário
+    }, { validators: this.passwordMatchValidator });
   }
 
-  // Validador Customizado para ver se as senhas batem
   passwordMatchValidator(form: AbstractControl): ValidationErrors | null {
     const password = form.get('password')?.value;
     const confirmPassword = form.get('confirmPassword')?.value;
@@ -66,7 +64,7 @@ export class RegisterComponent {
 
   onSubmit(): void {
     if (this.registerForm.invalid) {
-       this.registerForm.markAllAsTouched(); // Obriga o formulário a mostrar os avisos a vermelho
+       this.registerForm.markAllAsTouched();
        return;
     }
 

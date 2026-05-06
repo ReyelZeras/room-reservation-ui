@@ -6,21 +6,18 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-rooms',
   standalone: false,
-  templateUrl: './rooms.html',
-  styleUrls: ['./rooms.css']
+  templateUrl: './rooms.component.html'
 })
 export class RoomsComponent implements OnInit {
   rooms: any[] = [];
   filteredRooms: any[] = [];
 
-  // Filtros
   searchTerm: string = '';
   searchStart: string = '';
   searchEnd: string = '';
   isSearchingAvailability: boolean = false;
   availabilityError: string = '';
 
-  // Modal
   showBookingModal = false;
   selectedRoom: any = null;
   bookingTitle: string = '';
@@ -33,7 +30,7 @@ export class RoomsComponent implements OnInit {
     private roomService: RoomService,
     private bookingService: BookingService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef // 🚀 INJETADO PARA FORÇAR ATUALIZAÇÃO DA TELA
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -45,8 +42,8 @@ export class RoomsComponent implements OnInit {
     this.roomService.getAllRooms().subscribe({
       next: (data: any) => {
         this.rooms = data.content ? data.content : data;
-        this.filteredRooms = [...this.rooms]; // 🚀 PREENCHE AS SALAS LOGO NO INÍCIO
-        this.cdr.detectChanges(); // 🚀 FORÇA O ANGULAR A DESENHAR A TELA
+        this.filteredRooms = [...this.rooms];
+        this.cdr.detectChanges();
       },
       error: (err: any) => console.error('Erro ao carregar salas', err)
     });
@@ -63,7 +60,7 @@ export class RoomsComponent implements OnInit {
       );
     }
     this.filteredRooms = tempRooms;
-    this.cdr.detectChanges(); // Força atualização ao digitar
+    this.cdr.detectChanges();
   }
 
   checkAvailability() {

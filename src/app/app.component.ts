@@ -6,7 +6,6 @@ import { filter, map } from 'rxjs/operators';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.css'],
   standalone: false // A MÁGICA ESTÁ AQUI: Evita o erro NG6008
 })
 export class AppComponent implements OnInit {
