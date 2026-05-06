@@ -1,0 +1,24 @@
+<div class="container mx-auto mt-10 max-w-md">
+  <div class="bg-white p-8 rounded shadow-md text-center">
+    <h3 class="text-2xl font-bold mb-6">Verificação de Conta</h3>
+
+    <div *ngIf="loading" class="text-gray-600 mb-4">
+      <p>A verificar o seu token de segurança, por favor aguarde...</p>
+    </div>
+
+    <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+      {{ successMessage }}
+      <p class="text-sm mt-2 font-semibold">A redirecionar para o login...</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!loading && errorMessage" class="mt-4">
+      <a routerLink="/login" class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800">
+        Voltar para o Login
+      </a>
+    </div>
+  </div>
+</div>

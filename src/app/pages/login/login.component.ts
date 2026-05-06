@@ -6,8 +6,9 @@ import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
+  templateUrl: './login.component.html', // APONTA PARA A CONVENÇÃO
   standalone: false
+  // REMOVIDO O styleUrls PARA O ANGULAR IGNORAR O CSS VAZIO
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -73,7 +74,6 @@ export class LoginComponent implements OnInit {
           if (err.name === 'TimeoutError') {
             this.errorMessage = 'O servidor demorou muito para responder. Tente novamente.';
           } else if (err.status === 403 || (err.error && err.error.message && err.error.message.includes('inativa'))) {
-            // CORREÇÃO: Captura perfeitamente a exceção de conta inativa
             this.errorMessage = 'A sua conta está inativa. Por favor, verifique a sua caixa de e-mail e clique no link de ativação.';
           } else if (err.status === 401) {
             this.errorMessage = 'E-mail ou senha incorretos.';
