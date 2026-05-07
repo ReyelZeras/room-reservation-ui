@@ -16,33 +16,33 @@ export interface UserProfile {
   providedIn: 'root'
 })
 export class UserService {
+  // CORREÇÃO: URL Relativa
   private apiUrl = '/api/v1/users';
 
   constructor(private http: HttpClient) {}
 
-  // Busca todos os usuários do banco de dados
-  getAllUsers(): Observable<UserProfile[]> {
-    return this.http.get<UserProfile[]>(this.apiUrl);
+  getAllUsers(): Observable<any> {
+    return this.http.get<any>(this.apiUrl);
   }
 
-  // Atualiza os dados básicos do Perfil (Nome, E-mail)
- updateUser(id: string, payload: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, payload);
-  }
-
-  // Altera o privilégio do usuário (Ex: de USER para ADMIN)
   updateUserRole(id: string, newRole: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, { role: newRole });
   }
 
-    // NOVA FUNCIONALIDADE: Endpoint para atualizar a senha
+  updateUser(id: string, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, payload);
+  }
+
   changePassword(id: string, payload: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/password`, payload);
   }
 
-
-  // Envia o pedido para Ativar/Inativar
   toggleUserStatus(id: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/status`, {});
+  }
+
+  // NOVA FUNÇÃO (Falha 5: Excluir Permanente)
+  deleteUser(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

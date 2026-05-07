@@ -1,15 +1,14 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Subject, BehaviorSubject } from 'rxjs';
-import { AuthService } from './auth.service';
+import { Subject } from 'rxjs';
 
-// ERRO DE COMPILAÇÃO CORRIGIDO: As datas agora são obrigatórias na tipagem
 export interface AppNotification {
-  userName: string;
-  roomName: string;
-  title?: string;
-  createdAt: string;
-  startTime: string;
+  id?: string;
+  message: string;
   read: boolean;
+  roomName?: string;
+  userName?: string;
+  createdAt?: string;
+  startTime?: string;
 }
 
 @Injectable({
@@ -17,66 +16,56 @@ export interface AppNotification {
 })
 export class NotificationService {
   private eventSource: EventSource | null = null;
-  public notificationSubject = new Subject<any>();
+  private notificationsSubject = new Subject<AppNotification[]>();
+  public notifications$ = this.notificationsSubject.asObservable();
+  private notifications: AppNotification[] = [];
 
-  private notificationsListSubject = new BehaviorSubject<AppNotification[]>([]);
-  public notifications$ = this.notificationsListSubject.asObservable();
+  constructor(private zone: NgZone) {}
 
-  constructor(private authService: AuthService, private zone: NgZone) {}
-
-  connect(): void {
-    const user = this.authService.currentUserValue;
-    if (!user || user.role !== 'ADMIN') return;
-
-    if (this.eventSource) {
-      this.eventSource.close();
+  connect() {
+    if (this.eventSource && this.eventSource.readyState !== 2) {
+      return;
     }
 
-    console.log('📡 [SSE] Tentando conectar ao canal de Notificações...');
+    console.log('Tentando conectar ao SSE (Modo Ciclo Curto)...');
     this.eventSource = new EventSource('/api/v1/notifications/stream');
 
-    this.eventSource.onopen = () => {
-      console.log('🟢 [SSE] Conectado com sucesso! À escuta de reservas...');
-    };
+    this.eventSource.onopen = () => { console.log('✅ SSE Conectado. Aguardando evento...'); };
 
-    //  O NgZone força a tela a atualizar assim que o sinal chega
-    this.eventSource.addEventListener('nova-reserva', (event: any) => {
+    this.eventSource.addEventListener('notification', (event: any) => {
       this.zone.run(() => {
-        console.log('🔔 [SSE] EVENTO RECEBIDO NO FRONT-END:', event.data);
-        if (event.data) {
-          const data = JSON.parse(event.data);
-          this.notificationSubject.next(data);
-
-          const newNotification: AppNotification = {
-            ...data,
-            read: false
-          };
-
-          const currentNotifs = this.notificationsListSubject.value;
-          this.notificationsListSubject.next([newNotification, ...currentNotifs]);
-        }
+        console.log('🔔 MENSAGEM SSE REAL CHEGOU:', event.data);
+        const data = JSON.parse(event.data);
+        const notif: AppNotification = {
+          message: data.message || 'Nova notificação',
+          read: false,
+          roomName: data.roomName,
+          userName: data.userName,
+          createdAt: data.createdAt,
+          startTime: data.startTime
+        };
+        this.notifications.unshift(notif);
+        this.notificationsSubject.next([...this.notifications]);
       });
     });
 
-    this.eventSource.addEventListener('ping', () => {});
-
     this.eventSource.onerror = (error) => {
-      console.error('🔴 [SSE] Conexão perdida. Tentando reconectar...', error);
-      this.eventSource?.close();
-      setTimeout(() => this.connect(), 5000);
+      // Como o backend vai fechar a conexão de propósito após 1 evento,
+      // este erro vai disparar. Nós apenas mandamos reconectar na hora!
+      this.disconnect();
+      setTimeout(() => this.connect(), 1000);
     };
   }
 
-  disconnect(): void {
+  disconnect() {
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;
     }
   }
 
-  markAllAsRead(): void {
-    const currentNotifs = this.notificationsListSubject.value;
-    const updatedNotifs = currentNotifs.map(n => ({ ...n, read: true }));
-    this.notificationsListSubject.next(updatedNotifs);
+  markAllAsRead() {
+    this.notifications.forEach(n => n.read = true);
+    this.notificationsSubject.next([...this.notifications]);
   }
 }

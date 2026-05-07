@@ -6,9 +6,8 @@ import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html', // APONTA PARA A CONVENÇÃO
-  standalone: false
-  // REMOVIDO O styleUrls PARA O ANGULAR IGNORAR O CSS VAZIO
+  standalone: false,
+  templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -87,6 +86,7 @@ export class LoginComponent implements OnInit {
   }
 
   loginWithGithub(): void {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/github';
+    // CORREÇÃO: Rota relativa, o Proxy resolve pra localhost localmente, e a nuvem resolve o Cloudflare automaticamente!
+    window.location.href = '/oauth2/authorization/github';
   }
 }

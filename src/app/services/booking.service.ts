@@ -3,34 +3,34 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Booking {
-  id: string;
+  id?: string;
   userId: string;
   roomId: string;
-  title?: string;
   startTime: string;
   endTime: string;
   status: string;
-  createdAt?: string;
+  title?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class BookingService {
+  // CORREÇÃO: URL Relativa
   private apiUrl = '/api/v1/bookings';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   createBooking(bookingData: any): Observable<any> {
     return this.http.post(this.apiUrl, bookingData);
   }
 
-  getMyBookings(userId: string): Observable<Booking[]> {
-    return this.http.get<Booking[]>(`${this.apiUrl}/user/${userId}`);
+  getMyBookings(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/user/${userId}`);
   }
 
-  getUserBookings(userId: string): Observable<Booking[]> {
-    return this.http.get<Booking[]>(`${this.apiUrl}/user/${userId}`);
+  getUserBookings(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/user/${userId}`);
   }
 
   cancelBooking(bookingId: string): Observable<any> {
@@ -43,12 +43,11 @@ export class BookingService {
   }
 
   rescheduleBooking(id: string, newStart: string, newEnd: string): Observable<any> {
-    const params = new HttpParams().set('newStart', newStart).set('newEnd', newEnd);
+    let params = new HttpParams().set('newStart', newStart).set('newEnd', newEnd);
     return this.http.patch<any>(`${this.apiUrl}/${id}/reschedule`, null, { params });
   }
 
-  // --- NOVA FUNCIONALIDADE: Buscar Reservas Específicas de Uma Sala ---
-  getRoomBookings(roomId: string): Observable<Booking[]> {
-    return this.http.get<Booking[]>(`${this.apiUrl}/room/${roomId}`);
+  getRoomBookings(roomId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/room/${roomId}`);
   }
 }
