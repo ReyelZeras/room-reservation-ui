@@ -1,25 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Room {
-  id?: string;
-  name: string;
-  capacity: number;
-  location: string;
-  status: string;
-}
+import { Room } from '../models/room';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoomService {
+  // CORREÇÃO: URL Relativa
   private apiUrl = '/api/v1/rooms';
 
   constructor(private http: HttpClient) {}
 
-  getAllRooms(): Observable<Room[]> {
-    return this.http.get<Room[]>(this.apiUrl);
+  getAllRooms(): Observable<any> {
+    return this.http.get<any>(this.apiUrl);
+  }
+
+  getAvailableRooms(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/available`);
   }
 
   getRoomById(id: string): Observable<Room> {
@@ -34,7 +32,7 @@ export class RoomService {
     return this.http.put<Room>(`${this.apiUrl}/${id}`, room);
   }
 
-  deleteRoom(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deleteRoom(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

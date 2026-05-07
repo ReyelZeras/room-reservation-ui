@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { BookingService, Booking } from '../../services/booking.service';
 
+
 @Component({
   selector: 'app-admin-rooms',
   standalone: false,
@@ -12,6 +13,7 @@ export class AdminRoomsComponent implements OnInit {
   isLoading = false;
   message = '';
 
+
   // Variáveis do CRUD de Salas
   showRoomModal = false;
   isEditing = false;
@@ -19,11 +21,14 @@ export class AdminRoomsComponent implements OnInit {
   currentRoom: any = { name: '', capacity: 0, location: '', status: 'AVAILABLE' };
   roomModalError = '';
 
+
   // Variáveis da Auditoria (Olhinho)
   showBookingsModal = false;
   selectedRoomForBookings: any = null;
   roomBookings: Booking[] = [];
   isLoadingBookings = false;
+  errorMessage: any;
+
 
   constructor(
     private roomService: RoomService,
@@ -31,9 +36,11 @@ export class AdminRoomsComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+
   ngOnInit() {
     this.loadRooms();
   }
+
 
   loadRooms() {
     this.isLoading = true;
@@ -51,12 +58,14 @@ export class AdminRoomsComponent implements OnInit {
     });
   }
 
+
   openRoomBookingsModal(room: any) {
     this.selectedRoomForBookings = room;
     this.showBookingsModal = true;
     this.isLoadingBookings = true;
     this.roomBookings = [];
     this.cdr.detectChanges();
+
 
     this.bookingService.getRoomBookings(room.id).subscribe({
       next: (data: any) => {
@@ -73,12 +82,14 @@ export class AdminRoomsComponent implements OnInit {
     });
   }
 
+
   closeRoomBookingsModal() {
     this.showBookingsModal = false;
     this.selectedRoomForBookings = null;
     this.roomBookings = [];
     this.cdr.detectChanges();
   }
+
 
   openCreateModal() {
     this.isEditing = false;
@@ -87,6 +98,7 @@ export class AdminRoomsComponent implements OnInit {
     this.showRoomModal = true;
   }
 
+
   openEditModal(room: any) {
     this.isEditing = true;
     this.currentRoom = { ...room };
@@ -94,14 +106,17 @@ export class AdminRoomsComponent implements OnInit {
     this.showRoomModal = true;
   }
 
+
   closeRoomModal() {
     this.showRoomModal = false;
   }
+
 
   saveRoom() {
     this.isSaving = true;
     this.roomModalError = '';
     this.cdr.detectChanges();
+
 
     if (this.isEditing) {
       this.roomService.updateRoom(this.currentRoom.id, this.currentRoom).subscribe({
@@ -137,16 +152,46 @@ export class AdminRoomsComponent implements OnInit {
     }
   }
 
-  deleteRoom(id: string) {
-    if (confirm('Tem certeza que deseja remover esta sala do sistema?')) {
-      this.roomService.deleteRoom(id).subscribe({
-        next: () => {
-          this.message = 'Sala removida com sucesso.';
-          this.loadRooms();
-          setTimeout(() => { this.message = ''; this.cdr.detectChanges(); }, 4000);
-        },
-        error: (err: any) => console.error('Erro ao deletar sala', err)
-      });
-    }
+  showDeleteModal = false;
+  roomToDelete: any = null;
+
+  openDeleteModal(room: any): void {
+    console.log('Dados da Sala selecionada:', room);
+    this.roomToDelete = room;
+    this.showDeleteModal = true;
   }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.roomToDelete = null;
+  }
+
+  confirmDeleteRoom(): void {
+    if (!this.roomToDelete) return;
+    this.roomService.deleteRoom(this.roomToDelete.id).subscribe({
+      next: () => {
+        this.message = 'Sala removida com sucesso!';
+        this.closeDeleteModal();
+        this.loadRooms();
+        setTimeout(() => this.message = '', 4000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Erro: Não é possível excluir uma sala que possui reservas.';
+        this.closeDeleteModal();
+        setTimeout(() => this.errorMessage = '', 5000);
+      }
+    });
+  }
+
+
+
+
+
+
+
 }
+
+
+
+
+

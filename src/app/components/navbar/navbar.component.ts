@@ -13,6 +13,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showNotifications = false;
   notifications: AppNotification[] = [];
   unreadCount = 0;
+  isMobileMenuOpen = false;
 
   private notifSub!: Subscription;
 
@@ -24,12 +25,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Conecta ao SSE se for ADMIN
     if (this.authService.currentUserValue?.role === 'ADMIN') {
       this.notificationService.connect();
     }
 
-    // Inscreve-se na lista de notificações para desenhar a bolinha vermelha
     this.notifSub = this.notificationService.notifications$.subscribe((notifs: AppNotification[]) => {
       this.notifications = notifs;
       this.unreadCount = notifs.filter(n => !n.read).length;
@@ -39,14 +38,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   toggleNotifications(): void {
     this.showNotifications = !this.showNotifications;
-
     if (this.showNotifications && this.unreadCount > 0) {
       this.notificationService.markAllAsRead();
       this.cdr.detectChanges();
     }
   }
 
-  // TIPAGEM BLINDADA: 'any' neutraliza a fúria do TypeScript e impede que a compilação quebre
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
   formatDate(dateStr: any): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -55,7 +56,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.logout();
-    this.notificationService.disconnect();
+    this.notificationService.disconnect(); // Desconecta apenas ao fazer logout.
     this.router.navigate(['/login']);
   }
 
@@ -63,6 +64,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (this.notifSub) {
       this.notifSub.unsubscribe();
     }
-    this.notificationService.disconnect();
+    // CRUCIAL: Removemos o this.notificationService.disconnect() daqui.
+    // Isso resolve o bug em que a conexão morria ao trocar de página no Angular.
   }
 }

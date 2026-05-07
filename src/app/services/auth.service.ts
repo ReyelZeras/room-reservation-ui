@@ -11,6 +11,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  // CORREÇÃO: URL Relativa! Funciona perfeitamente via Cloudflare/Mobile e via Proxy no Localhost.
   private readonly API_URL = '/api/v1/auth';
 
   constructor(private http: HttpClient, private router: Router) {
@@ -24,7 +25,6 @@ export class AuthService {
     return this.http.post('/api/v1/users', payload);
   }
 
-  // FIM DO MOCK! Agora fazemos um POST real enviando e-mail e senha para validação
   login(email: string, password?: string): Observable<any> {
     const payload = { email, password };
 
@@ -40,7 +40,6 @@ export class AuthService {
           })
         );
       })
-      // REMOVIDO O catchError que quebrava o encadeamento e gerava o loop!
     );
   }
 

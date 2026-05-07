@@ -1,29 +1,32 @@
-<nav class="bg-blue-700 p-4 text-white shadow-lg">
-  <div class="max-w-7xl mx-auto flex justify-between items-center w-full px-2 sm:px-6 lg:px-8 relative">
+<nav class="bg-blue-700 p-4 text-white shadow-lg relative z-50">
+  <div class="max-w-7xl mx-auto flex justify-between items-center w-full px-2 sm:px-6 lg:px-8">
 
-    <!-- Logo -->
     <div class="flex items-center space-x-3">
+
+      <button (click)="toggleMobileMenu()" class="md:hidden text-white hover:text-gray-200 focus:outline-none transition-colors p-1">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path *ngIf="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <path *ngIf="isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
       <div class="h-8 w-8 bg-white text-blue-700 rounded flex items-center justify-center font-extrabold text-xl shadow-inner cursor-pointer" routerLink="/">R</div>
       <h1 class="text-xl font-bold tracking-wide cursor-pointer hidden sm:block" routerLink="/">RoomRes</h1>
     </div>
 
-    <!-- Links Centrais (Sem o Sobre o Projeto para limpar a tela) -->
     <div class="hidden md:flex space-x-4 lg:space-x-6 items-center flex-grow justify-center text-sm lg:text-base">
       <a routerLink="/rooms" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Catálogo de Salas</a>
       <a routerLink="/my-bookings" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Minhas Reservas</a>
       <a routerLink="/profile" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Meu Perfil</a>
 
-      <!-- ABAS EXCLUSIVAS DO ADMINISTRADOR -->
       <ng-container *ngIf="authService.currentUserValue?.role === 'ADMIN'">
         <a routerLink="/admin/rooms" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Gestão de Salas</a>
         <a routerLink="/admin/users" routerLinkActive="border-white" class="text-white hover:text-blue-200 font-medium transition-colors border-b-2 border-transparent hover:border-white">Gestão de Usuários</a>
       </ng-container>
     </div>
 
-    <!-- Canto Direito (Sininho e Perfil) -->
-    <div class="flex items-center space-x-3 lg:space-x-4">
+    <div class="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
 
-      <!-- SININHO DO ADMINISTRADOR -->
       <div *ngIf="authService.currentUserValue?.role === 'ADMIN'" class="relative">
         <button (click)="toggleNotifications()" class="text-white hover:text-gray-200 focus:outline-none relative p-1 transition-colors">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -34,12 +37,12 @@
           </span>
         </button>
 
-        <div *ngIf="showNotifications" class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+        <div *ngIf="showNotifications" class="origin-top-right absolute right-0 mt-2 w-[280px] sm:w-80 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
           <div class="py-2 border-b border-gray-100 flex justify-between items-center px-4">
             <h3 class="text-sm font-bold text-gray-800">Notificações em Tempo Real</h3>
             <button (click)="toggleNotifications()" class="text-gray-400 hover:text-gray-600"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
           </div>
-          <div class="max-h-96 overflow-y-auto">
+          <div class="max-h-80 sm:max-h-96 overflow-y-auto">
             <div *ngIf="notifications.length === 0" class="px-4 py-6 text-sm text-center text-gray-500">Nenhuma notificação nova.</div>
             <div *ngFor="let notif of notifications" class="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors" [ngClass]="{'bg-blue-50': !notif.read}">
               <p class="text-sm text-gray-800"><span class="font-bold text-blue-600">{{ notif.userName }}</span> acabou de criar uma reserva.</p>
@@ -50,15 +53,25 @@
         </div>
       </div>
 
-      <!-- PERFIL DO USUÁRIO -->
-      <div class="flex items-center space-x-2 border-l border-blue-500 pl-3 lg:pl-4">
-        <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center border-2 border-blue-400">
-          <span class="text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A').toUpperCase() }}</span>
+      <div class="flex items-center space-x-2 border-l border-blue-500 pl-2 sm:pl-3 lg:pl-4">
+        <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-blue-500 flex items-center justify-center border-2 border-blue-400">
+          <span class="text-xs sm:text-sm font-bold">{{ (authService.currentUserValue?.name?.charAt(0) || 'A').toUpperCase() }}</span>
         </div>
         <span class="text-sm font-medium hidden lg:block">{{ authService.currentUserValue?.name }}</span>
       </div>
 
-      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-md text-sm font-semibold transition-all shadow ml-2">Sair</button>
+      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all shadow ml-1 sm:ml-2">Sair</button>
     </div>
+  </div>
+
+  <div *ngIf="isMobileMenuOpen" class="md:hidden mt-3 pt-3 border-t border-blue-500 space-y-2 px-2 pb-2">
+    <a routerLink="/rooms" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-600 transition-colors">Catálogo de Salas</a>
+    <a routerLink="/my-bookings" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-600 transition-colors">Minhas Reservas</a>
+    <a routerLink="/profile" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-600 transition-colors">Meu Perfil</a>
+
+    <ng-container *ngIf="authService.currentUserValue?.role === 'ADMIN'">
+      <a routerLink="/admin/rooms" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-blue-200 hover:bg-blue-600 hover:text-white transition-colors">Gestão de Salas</a>
+      <a routerLink="/admin/users" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-blue-200 hover:bg-blue-600 hover:text-white transition-colors">Gestão de Usuários</a>
+    </ng-container>
   </div>
 </nav>

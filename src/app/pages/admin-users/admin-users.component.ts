@@ -5,10 +5,11 @@ import { BookingService, Booking } from '../../services/booking.service';
 import { RoomService } from '../../services/room.service';
 import { forkJoin } from 'rxjs';
 
+
 @Component({
   selector: 'app-admin-users',
   standalone: false,
-  templateUrl: './admin-users.component.html' 
+  templateUrl: './admin-users.component.html'
 })
 export class AdminUsersComponent implements OnInit {
   users: UserProfile[] = [];
@@ -18,28 +19,32 @@ export class AdminUsersComponent implements OnInit {
   errorMessage = '';
   currentUserEmail = '';
 
-  // Filtros
+
   searchTerm = '';
   filterRole = '';
   filterStatus = '';
   filterProvider = '';
 
-  // Variáveis Partilhadas de Modal
+
   userToModify: UserProfile | null = null;
 
-  // Modal 1: Auditoria de Reservas
+
   showBookingsModal = false;
   selectedUserForBookings: UserProfile | null = null;
   userBookings: Booking[] = [];
   isLoadingBookings = false;
 
-  // Modal 2: Promover/Rebaixar
+  showDeleteModal = false;
+  userToDelete: any = null;
+
+
   showRoleConfirmModal = false;
   roleToApply = '';
 
-  // Modal 3: Ativar/Inativar
+
   showStatusConfirmModal = false;
   isSubmittingStatus = false;
+
 
   constructor(
     private userService: UserService,
@@ -49,10 +54,12 @@ export class AdminUsersComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+
   ngOnInit(): void {
     this.currentUserEmail = this.authService.currentUserValue?.email || '';
     this.loadData();
   }
+
 
   loadData(): void {
     this.isLoading = true;
@@ -76,9 +83,11 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+
   getRoomName(roomId: string): string {
     return this.roomMap.get(roomId) || 'Sala Removida / Desconhecida';
   }
+
 
   get filteredUsers(): UserProfile[] {
     return this.users.filter(user => {
@@ -89,15 +98,66 @@ export class AdminUsersComponent implements OnInit {
       const providerStr = user.provider ? user.provider.toLowerCase() : 'local';
       const matchProvider = !this.filterProvider || providerStr === this.filterProvider.toLowerCase();
 
+
       return matchSearch && matchRole && matchStatus && matchProvider;
     });
   }
 
+
+  // --- NOVA FUNCIONALIDADE: EXCLUIR PERMANENTEMENTE ---
+/*   deleteUserPermanently(user: UserProfile): void {
+    if (confirm(`Tem certeza ABSOLUTA que deseja apagar o utilizador ${user.name} permanentemente? Esta ação não pode ser desfeita e pode falhar se ele tiver reservas vinculadas.`)) {
+      this.userService.deleteUser(user.id).subscribe({
+        next: () => {
+          this.message = 'Utilizador removido do banco de dados com sucesso!';
+          this.loadData();
+          setTimeout(() => { this.message = ''; this.cdr.detectChanges(); }, 5000);
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Erro ao excluir utilizador. Verifique se ele possui reservas atreladas.';
+          this.cdr.detectChanges();
+          setTimeout(() => { this.errorMessage = ''; this.cdr.detectChanges(); }, 5000);
+        }
+      });
+    }
+  } */
+
+  openDeleteModal(user: any): void {
+    this.userToDelete = user;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.userToDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (this.userToDelete) {
+      this.userService.deleteUser(this.userToDelete.id).subscribe({
+        next: () => {
+          this.message = 'Utilizador removido permanentemente!';
+          this.closeDeleteModal();
+          this.loadData();
+          setTimeout(() => { this.message = ''; }, 5000);
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Erro ao excluir utilizador.';
+          this.closeDeleteModal();
+          setTimeout(() => { this.errorMessage = ''; }, 5000);
+        }
+      });
+    }
+  }
+
+
+  // ... (Outros métodos de Modal omitidos para brevidade, mantenha todos iguais como já estão no seu código atual) ...
   openBookingsModal(user: UserProfile): void {
     this.selectedUserForBookings = user;
     this.showBookingsModal = true;
     this.isLoadingBookings = true;
     this.userBookings = [];
+
 
     this.bookingService.getMyBookings(user.id).subscribe({
       next: (bookings: Booking[]) => {
@@ -113,15 +173,18 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+
   closeBookingsModal(): void {
     this.showBookingsModal = false;
     this.selectedUserForBookings = null;
   }
 
+
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
+
 
   openRoleConfirmModal(user: UserProfile, newRole: string): void {
     this.userToModify = user;
@@ -129,13 +192,16 @@ export class AdminUsersComponent implements OnInit {
     this.showRoleConfirmModal = true;
   }
 
+
   closeRoleConfirmModal(): void {
     this.showRoleConfirmModal = false;
     this.userToModify = null;
   }
 
+
   confirmRoleChange(): void {
     if (!this.userToModify) return;
+
 
     this.userService.updateUserRole(this.userToModify.id, this.roleToApply).subscribe({
       next: () => {
@@ -151,10 +217,12 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+
   openStatusConfirmModal(user: UserProfile): void {
     this.userToModify = user;
     this.showStatusConfirmModal = true;
   }
+
 
   closeStatusConfirmModal(): void {
     if (this.isSubmittingStatus) return;
@@ -162,25 +230,25 @@ export class AdminUsersComponent implements OnInit {
     this.userToModify = null;
   }
 
+
   confirmStatusChange(): void {
     if (!this.userToModify) return;
+
 
     this.isSubmittingStatus = true;
     const isActivating = !this.userToModify.active;
 
+
     this.userService.toggleUserStatus(this.userToModify.id).subscribe({
       next: (updatedUser) => {
         this.isSubmittingStatus = false;
-
         const index = this.users.findIndex(u => u.id === updatedUser.id);
         if (index !== -1) {
           this.users[index].active = updatedUser.active;
         }
-
         this.message = `A conta foi ${updatedUser.active ? 'ativada' : 'inativada'} com sucesso!`;
         this.closeStatusConfirmModal();
         this.cdr.detectChanges();
-
         setTimeout(() => { this.message = ''; this.cdr.detectChanges(); }, 5000);
       },
       error: () => {

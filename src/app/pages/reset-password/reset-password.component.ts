@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -10,53 +10,61 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ResetPasswordComponent implements OnInit {
   resetForm: FormGroup;
-  loading = false;
-  submitted = false;
-  token = '';
-  successMessage = '';
-  errorMessage = '';
+  token: string | null = null;
+  isLoading = false;
+  message = '';
+  error = '';
+
+  // Variável para controlar a exibição do olhinho
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
   ) {
     this.resetForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  ngOnInit() {
-    this.token = this.route.snapshot.queryParams['token'] || '';
+  ngOnInit(): void {
+    this.token = this.route.snapshot.queryParamMap.get('token');
     if (!this.token) {
-      this.errorMessage = 'Token inválido ou ausente. Por favor, solicite a recuperação novamente.';
+      this.error = 'Token inválido ou não fornecido.';
     }
   }
 
-  get f() { return this.resetForm.controls; }
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 
-  onSubmit() {
-    this.submitted = true;
+  onSubmit(): void {
     if (this.resetForm.invalid || !this.token) return;
 
-    this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.isLoading = true;
+    this.message = '';
+    this.error = '';
 
-    const payload = { newPassword: this.resetForm.value.newPassword };
+    const payload = {
+      token: this.token,
+      newPassword: this.resetForm.value.newPassword,
+      password: this.resetForm.value.newPassword
+    };
 
-    this.http.post(`/api/v1/auth/reset-password?token=${encodeURIComponent(this.token)}`, payload, { responseType: 'text' })
-      .subscribe({
-        next: (msg: any) => {
-          this.successMessage = msg || 'Senha redefinida com sucesso.';
-          this.loading = false;
-          setTimeout(() => this.router.navigate(['/login']), 3000);
-        },
-        error: (err: any) => {
-          this.errorMessage = err.error || 'Erro ao redefinir a senha. O link pode ter expirado.';
-          this.loading = false;
-        }
-      });
+    this.http.post('/api/v1/auth/reset-password', payload).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.message = 'Senha alterada com sucesso! Você já pode fazer login.';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.error = err.error?.message || 'Ocorreu um erro ao redefinir a senha.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
